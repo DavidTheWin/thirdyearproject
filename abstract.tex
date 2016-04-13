@@ -1,3 +1,7 @@
 \begin{abstract}
-\todo[inline]{abstract goes here}
+This paper details the tool \textsc{qbftoepr} that converts \glspl{qbf} to \gls{epr} through a process of skolemization. 
+This opens new techniques for solving \glspl{qbf} using automated theorem provers for first order logic such as iProver \cite{iprover} over traditional techniques for solving \glspl{qbf} such as the \gls{dpll} algorithm\todo{cite dpll algorithm}. 
+Other techniques are discussed for improving the efficiency of conversion and reducing the complexity of the \gls{epr} result. In particular, an implementation of dependency schemes is detailed and the concept of anti-prenexing is outlined. 
+The tool is evaluated against the traditional \gls{qbf} solver DepQBF \cite{depqbf} to compare the efficiency of converting and solving to solving the \gls{qbf} directly. 
+It is also evaluated against another tool called qbf2epr \cite{qbf2epr} that also converts \glspl{qbf} to \gls{epr} to compare it against a different implentation of the same conversion.
 \end{abstract}

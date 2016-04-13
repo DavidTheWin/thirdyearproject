@@ -1,12 +1,39 @@
 \chapter{Background}
-\todo[inline]{Background goes here}
+First we must introduce the terminology and concepts of boolean logic including propositional logic, first order logic (including \gls{epr}) and quantified propositional logic.
+After the terminology has been introduced the complexity classes of the satisfiability problem of each logic will be discussed.
+Finally the concept of automated reasoning of both first order logic and \gls{qbf} will be detailed.
 
-\section{Boolean Logic}
-\subsection{Propositional Logic and EPR}
-\subsection{Quantified boolean formulas}
+\section{Boolean Logic and Satisfiability}
+Boolean logic and \gls{sat} have found wide applications in industry and research because propositional satisfiability is the prototypical problem for NP-Completeness so any other NP-Hard problem can be embedded in propositional satisfiability.
+\todo{this needs rewriting, sat stuff is next section}
+
+\subsection{Propositional Logic}
+A propositional variable $p$ can take one of two values; either $true$ or $false$. A variable can be negated using the \gls{not} symbol which reverses its value. If $p$ was $true$ then $\neg p$ is $false$ and vice versa. We will call a variable or its negation a \textit{literal} and denote the positive literal by $l$ and the negative literal by $\bar{l}$.
+Boolean formulas are constructed from propositional variables built using the logical connectives \gls{or}, \gls{and} and \gls{implies}. A typical boolean formula might look like $(x \land y) \to z$.
+
+The satisfiability of a boolean formula is a decision problem that asks if an assignment of truth values to propositional variables can make the boolean formula true. In the previous example of $(x \land y) \to z$ we can see that it is satisfiable as the assignment $x := true; y := true; z := true$ makes it true.
+
+We require a more standard form of boolean formula that is easier to describe as an input format. For this we will use \gls{cnf}. \Gls{cnf} is a conjunction of clauses and a clause is a disjunction of literals. For example, a clause might be $(p \lor \neg q)$ and a full formula in \gls{cnf} might look like $(p \lor r) \land (\neg r \lor q) \land (q)$. Using \gls{cnf} allows us to more easily work with boolean formulas algorithmically.
+
+\subsection{Quantified Boolean Formulas}
+\Gls{qbf} extends propositional logic with the \gls{forall} and \gls{exists} quantifiers. The statement $\forall x \exists y (x \lor y)$ states that for every assignment of $x$ there is at least one assignment of $y$ such that the formula $(x \lor y)$ is true. We can see that this is true; if $x := true$ then the formula is true but if $x := false$ then the assignment $y := false$ doesn't work but that $y := true$ does make the formula satisfiable. Therefore, for any assignment of $x$ there exists an assignment of $y$ such that the formula is true.
+
+In the most general case quantifiers can appear anywhere in a \gls{qbf}. Again we need a more standard form of \gls{qbf} that we can deal with algorthmically. This form is called \textit{prenex} \gls{cnf} (however we may refer to it by just \gls{cnf} assuming that the formula is prenexed). Any \gls{qbf} is logically equivalent to a \gls{cnf} formula and the process for transforming the \gls{qbf} into \gls{cnf} is called \textit{prenexing}. This process uses rewriting rules to move all the quantifiers in the formula to the leftmost part of the formula resulting in a \textit{quantifier prefix}. For example, $(\neg (\exists x A) \land B$ is equivalent to $\forall x (\neg A \land B)$. Because all \glspl{qbf} are equivalent to some \gls{qbf} in \gls{cnf} we shall assume that any \gls{qbf} we are dealing with is already in \gls{cnf}.
+
+\subsection{First Order Logic}
+First order logic uses propositions that take variables or functions as arguments to form its formulas. These variables range over a specified problem domain such as the natural numbers. For example in thedomain of the natural numbers the formula $\forall n \exists m P(n, m)$ where $P(n, m) = m > n$ is true; for any natural number $n$ there is a number $m$ that is larger than $n$. This differs from our previous definition of \gls{qbf} in that \gls{qbf} deals with only variables in a two valued domain (i.e. boolean) and does not have propositions.
+
+Our notions of prenexed \gls{cnf} also extend to first order logic.
+
+As with propositional logic and \gls{qbf} we require a way to write our formulas that is convenient to work with. In this case we will use \gls{epr}, formally known as the \textit{Bernays-Sch{\"o}nfinkel class} of formulas. A formula is in \gls{epr} form if when it is written in \gls{cnf} it has the quantifier prefix $\exists * \forall *$ and contains no functions. This format will be useful because we can solve these problems using first order logic theorem provers.
 
 \section{Complexity of Satisfiability}
+Boolean Logics are significant in complexity theory as they are standard embeddings for other problems in their complexity classes.
+
 \subsection{SAT is NP complete}
+
 \subsection{QBF is PSPACE complete}
+
+\subsection{EPR is NEXPTIME complete}
 
 \section{Automated Reasoning}
