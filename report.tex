@@ -3,6 +3,12 @@
 \usepackage{todonotes}
 \usepackage{datetime}
 \usepackage{graphicx}
+\usepackage{titling}
+\usepackage[nottoc,numbib]{tocbibind}
+
+\setacronymstyle{long-sc-short}
+\loadglsentries{acronyms}
+\makenoidxglossaries
 
 \newdate{submissiondate}{03}{05}{2016}
 \newdateformat{monthyear}{%
@@ -12,6 +18,22 @@
 
 \input{titlepage.tex}
 
+\input{abstract.tex}
+
+\tableofcontents
+\newpage
+
+\input{introduction.tex}
+\input{background.tex}
+\input{qbftoepr.tex}
+\input{technicaldetails.tex}
+\input{futurework.tex}
+\input{evaluation.tex}
+\input{projectplan.tex}
+\input{conclusion.tex}
+
 \input{bibliography.tex}
+
+\printnoidxglossaries
 
 \end{document}
