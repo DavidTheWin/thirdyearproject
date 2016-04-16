@@ -13,5 +13,9 @@
 \subsection{Skolemization}
 \subsection{Removing Functions}
 \subsection{Dependency Scheme Construction}
+\subsection{Complexity}
+% raising to fol is linear in the number of clauses (and in their length?)? just translate symbols one at a time plus two extra clauses but that's dominated by the linearity of the symbol translation
+% skolemization: finding existential variables linear in the length of the prefix n, then one linear search of the matrix for each variable found, another n*m? (n*m)^2? disclaimer this might be wrong
+% removing functions is linear in the number of clauses (and in their length?)? replacing functions with predicates one by one
 
 \section{Testing}

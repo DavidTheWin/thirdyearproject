@@ -1,11 +1,66 @@
 \chapter{Converting QBF to EPR}
-\todo[inline]{acronym-ise header}
 \todo[inline]{Detailed conversion goes here}
+Now that we have introduced the concepts behind \gls{qbf} and \gls{epr} we can look at the procedure that \textit{qbftoepr} implements in greater depth. The algorithm is composed of three main steps detailed below. We shall follow an example through the process from input to output.
+The example \gls{qbf} we will work with is the following formula
+\begin{equation} \label{qbf:1}
+\begin{aligned}
+&\forall w \forall x \forall y \exists z \\
+&(y \lor z) &\land\\
+&(x \lor \neg z) &\land\\
+&(\neg x \lor w)\\
+\end{aligned}
+\end{equation}
 
 \section{Raising QBF to First Order Logic}
+The input to \textit{qbftoepr} is in \gls{qbf} form so it has propositional variables with no notion of predicates. We require an output in first order logic so the inputted \gls{qbf} must be 'raised' to first order logic before the algorithm continues.
 
-\section{Removing Existential Quantifiers by Skolemization}
+This 'raising' is relatively straightforward as most of the symbols used in the \gls{qbf} are also used in first order logic with the only difference being the variables and predicates. For example, the conjunction symbol used in \gls{qbf} can be used in first order logic with the same meaning. To raise the propositional variables used in the clauses to first order logic we introduce a predicate of arity 1 that takes the variable as an argument. For example the propositional variable $x$ would be raised to the predicate $p(x)$. Finally, the predicate $p$ must be defined. This is achieved by adding two clauses $(p(true)) \land (\neg p(false))$ to define how $p$ handles truth values in the new domain. Repeating this process recursively over an inputted \gls{qbf} gives us an \textit{equisatisfiable} formula in first order logic. This means that the \gls{qbf} is satisfiable if and only if the version translated into first order logic is satisfiable.
+
+In the case of the example \gls{qbf}~\ref{qbf:1} raising it to first order logic gives the following formula
+\begin{equation} \label{qbf:2}
+\begin{aligned}
+&\forall w \forall x \forall y \exists z\\
+&(p(y) \lor p(z)) &\land\\
+&(p(x) \lor \neg p(z)) &\land\\
+&(\neg p(x) \lor p(w)) &\land\\
+&(p(true)) &\land\\
+&(\neg p(false))
+\end{aligned}
+\end{equation}
+
+\section{Removing Existential Quantifiers by Skolemization} \label{skolemization}
+Once we have embedded our \gls{qbf} in first order logic we can begin to turn it into \gls{epr}. This process is called Skolemization~\cite{skolemization}. The first step in this process is to remove the existential quantifiers and replace the variables they quantify with functions that take as arguments the variables that the existential variable 'depends on'. What we mean by 'depends on' will be covered in greater depth in section~\ref{dependencyschemes}. Strictly speaking since \gls{epr} does allow existentially quantified variales at the start of the prefix replacing every existentially quantified variable is not completely necessary but we do require it for the output format. These outermost existential variables will be replaced by constants. Similarly to raising the formula to first order logic this process of Skolemization gives an equisatisfiable formula.
+
+We shall apply skolemization to our example \gls{qbf}~\ref{qbf:2} after it has been raised to first order logic assuming na{\"i}vely that our existential variables depend on every universal variable. This gives the following formula
+\begin{equation} \label{qbf:3}
+\begin{aligned}
+&\forall w \forall x \forall y\\
+&(p(y) \lor p(f_z(w, x, y))) &\land\\
+&(p(x) \lor \neg p(f_z(w, x, y))) &\land\\
+&(\neg p(x) \lor p(w)) &\land\\
+&(p(true)) &\land\\
+&(\neg p(false))
+\end{aligned}
+\end{equation}
 
 \section{Removing Function Symbols Introduced by Skolemization}
+The final step in converting our \gls{qbf} to \gls{epr} is to remove the function symbols that were introduced by skolemization. This is done by 'lifting' the functions to predicate. Lifting the functions to predicates means creating a new predicate whose arguments are the variables in the function being lifted. For example $p(f_z(x, y))$ would become the predicate $p_z(x, y)$. Once again this process produces a new formula that is equisatisfiable to the previous formula.
 
-\section{Dependency Schemes}
+Once all the functions have been lifted to predicates we have our \gls{epr} result. The definition of \gls{epr} required the prefix to be in the form $\exists * \forall *$ which was achieved by skolemization to remove all the existentially quantified variables and it also required there to be no function symbols which was achieved by lifting the functions to predicates. This result can then be used as the input to an \gls{epr} solver to determine its satisfiability. Because each step in the process preserved satisfiability proving (or disproving) the satisfiability of the \gls{epr} output gives the satisfiability of the original \gls{qbf} input.
+
+This is our example \gls{qbf}~\ref{qbf:3} after lifting its functions to predicates
+\begin{equation} \label{qbf:3}
+\begin{aligned}
+&\forall w \forall x \forall y\\
+&(p(y) \lor p_z(w, x, y)) &\land\\
+&(p(x) \lor \neg p_z(w, x, y)) &\land\\
+&(\neg p(x) \lor p(w)) &\land\\
+&(p(true)) &\land\\
+&(\neg p(false))
+\end{aligned}
+\end{equation}
+
+\section{Dependency Schemes} \label{dependencyschemes}
+In section~\ref{skolemization} existentially quantified variables were replaced by a function whose arguments were the universally quantified variables that the existentially quantified variable 'depended on'. 
+% trivial dep scheme
+% standard dep scheme
