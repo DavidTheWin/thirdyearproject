@@ -1,5 +1,4 @@
 \chapter{Converting QBF to EPR}
-\todo[inline]{Detailed conversion goes here}
 Now that we have introduced the concepts behind \gls{qbf} and \gls{epr} we can look at the procedure that \textit{qbftoepr} implements in greater depth. The algorithm is composed of three main steps detailed below. We shall follow an example through the process from input to output.
 The example \gls{qbf} we will work with is the following formula
 \begin{equation} \label{qbf:1}
@@ -61,6 +60,8 @@ This is our example \gls{qbf}~\ref{qbf:3} after lifting its functions to predica
 \end{equation}
 
 \section{Dependency Schemes} \label{dependencyschemes}
-In section~\ref{skolemization} existentially quantified variables were replaced by a function whose arguments were the universally quantified variables that the existentially quantified variable 'depended on'. 
-% trivial dep scheme
-% standard dep scheme
+In section~\ref{skolemization} existentially quantified variables were replaced by a function whose arguments were the universally quantified variables that the existentially quantified variable 'depended on'. A dependency scheme maps a variable to the variables that it depends on but this map must be computed. A dependency scheme is called tractable if it can be computed in polynomial time (proportional to the length of the formula).
+
+The simplest method of assigning dependencies to a variable is to say that it depends on everything that was quantified before it with a different quantifier. For the existentially quantified variables being considered for skolemization this means that they depend on any variable universally quantified before them. For example in the prefix $\exists w \forall x \forall y \exists z$ the variable $z$ depends on $x$ and $y$ because they were universally quantified before it but not $w$ because it was universally quantified before it. This is called the trivial dependency scheme and is clearly tractable by searching the prefix for universally quantified variables.
+\todo[inline]{Standard dependency scheme}
+\missingfigure{Connectivity graph of qbf}
