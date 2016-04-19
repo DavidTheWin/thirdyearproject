@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+thick,
+every node/.style={draw,circle},
+]
+
+\begin{scope}[start chain=going below,node distance=7mm]
+\node[on chain] (lw) [label=left: $w$] {};
+\node[on chain] (lx) [label=left: $x$] {};
+\node[on chain] (lz) [label=left: $z$] {};
+\node[on chain] (ly) [label=left: $y$] {};
+\end{scope}
+
+\begin{scope}[xshift=4cm,yshift=-0.5cm, start chain=going below, node distance=7mm]
+\node[on chain] (c1) [label=right: $\neg x \lor w$] {};
+\node[on chain] (c2) [label=right: $x \lor \neg z$] {};
+\node[on chain] (c3) [label=right: $y \lor z$] {};
+\end{scope}
+
+\draw (lw) -- (c1);
+\draw (lx) -- (c1);
+\draw (lx) -- (c2);
+\draw (lz) -- (c2);
+\draw (lz) -- (c3);
+\draw (ly) -- (c3);
+
+\end{tikzpicture}

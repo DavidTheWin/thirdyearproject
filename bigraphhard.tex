@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+thick,
+every node/.style={draw,circle},
+]
+
+\begin{scope}[start chain=going below,node distance=7mm]
+\node[on chain] (lu) [label=left: $u$] {};
+\node[on chain] (lv) [label=left: $v$] {};
+\node[on chain] (lw) [label=left: $w$] {};
+\node[on chain] (lx) [label=left: $x$] {};
+\node[on chain] (ly) [label=left: $y$] {};
+\node[on chain] (lz) [label=left: $z$] {};
+\end{scope}
+
+\begin{scope}[xshift=4cm,start chain=going below,node distance=7mm]
+\node[on chain] (c1) [label=right: $u \lor \neg v \lor x$] {};
+\node[on chain] (c2) [label=right: $u \lor \neg x$] {};
+\node[on chain] (c3) [label=right: $v \lor z$] {};
+\node[on chain] (c4) [label=right: $v \lor \neg z$] {};
+\node[on chain] (c5) [label=right: $w \lor x \lor y$] {};
+\node[on chain] (c6) [label=right: $y \lor \neg z$] {};
+\end{scope}
+
+\draw[dashed] (lu) -- (c1);
+\draw (lu) -- (c2);
+\draw[dashed] (lv) -- (c1);
+\draw[dashed] (lv) -- (c3);
+\draw (lv) -- (c4);
+\draw (lw) -- (c5);
+\draw (lx) -- (c1);
+\draw (lx) -- (c2);
+\draw (lx) -- (c5);
+\draw (ly) -- (c5);
+\draw (ly) -- (c6);
+\draw[dashed] (lz) -- (c3);
+\draw (lz) -- (c4);
+\draw (lz) -- (c6);
+
+\end{tikzpicture}
