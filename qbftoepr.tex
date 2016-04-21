@@ -1,6 +1,7 @@
-\chapter{Converting QBF to EPR} \label{chapter:2}
+\chapter{Converting QBF to EPR} \label{chapter:qbftoepr}
 Now that we have introduced the concepts behind \gls{qbf} and \gls{epr} we can look at the procedure that \textit{qbftoepr} implements in greater depth. The algorithm is composed of three main steps detailed below. We shall follow an example through the process from input to output.
-The example \gls{qbf} we will work with is the following formula
+The example \gls{qbf} we will work with is formula~\ref{qbf:1}.
+
 \begin{equation} \label{qbf:1}
 \begin{aligned}
 &\forall w \forall x \forall y \exists z \\
@@ -15,7 +16,8 @@ The input to \textit{qbftoepr} is in \gls{qbf} form so it has propositional vari
 
 This 'raising' is relatively straightforward as most of the symbols used in the \gls{qbf} are also used in first order logic with the only difference being the variables and predicates. For example, the conjunction symbol used in \gls{qbf} can be used in first order logic with the same meaning. To raise the propositional variables used in the clauses to first order logic we introduce a predicate of arity 1 that takes the variable as an argument. For example the propositional variable $x$ would be raised to the predicate $p(x)$. Finally, the predicate $p$ must be defined. This is achieved by adding two clauses $(p(true)) \land (\neg p(false))$ to define how $p$ handles truth values in the new domain. Repeating this process recursively over an inputted \gls{qbf} gives us an \textit{equisatisfiable} formula in first order logic. This means that the \gls{qbf} is satisfiable if and only if the version translated into first order logic is satisfiable.
 
-In the case of the example \gls{qbf}~\ref{qbf:1} raising it to first order logic gives the following formula
+In the case of the example \gls{qbf}~\ref{qbf:1} raising it to first order logic gives formula \ref{qbf:2}.
+
 \begin{equation} \label{qbf:2}
 \begin{aligned}
 &\forall w \forall x \forall y \exists z\\
@@ -30,7 +32,8 @@ In the case of the example \gls{qbf}~\ref{qbf:1} raising it to first order logic
 \section{Removing Existential Quantifiers by Skolemization} \label{skolemization}
 Once we have embedded our \gls{qbf} in first order logic we can begin to turn it into \gls{epr}. This process is called Skolemization~\cite{skolemization}. The first step in this process is to remove the existential quantifiers and replace the variables they quantify with functions that take as arguments the variables that the existential variable 'depends on'. What we mean by 'depends on' will be covered in greater depth in section~\ref{dependencyschemes}. Strictly speaking since \gls{epr} does allow existentially quantified variables at the start of the prefix replacing every existentially quantified variable is not completely necessary but we do require it for the output format. These outermost existential variables will be replaced by constants. Similarly to raising the formula to first order logic this process of Skolemization gives an equisatisfiable formula.
 
-We shall apply Skolemization to our example \gls{qbf}~\ref{qbf:2} after it has been raised to first order logic assuming na{\"i}vely that our existential variables depend on every universal variable. This gives the following formula
+We shall apply Skolemization to our example \gls{qbf}~\ref{qbf:2} after it has been raised to first order logic assuming na{\"i}vely that our existential variables depend on every universal variable. This gives the formula~\ref{qbf:3}.
+
 \begin{equation} \label{qbf:3}
 \begin{aligned}
 &\forall w \forall x \forall y\\
@@ -47,8 +50,9 @@ The final step in converting our \gls{qbf} to \gls{epr} is to remove the functio
 
 Once all the functions have been lifted to predicates we have our \gls{epr} result. The definition of \gls{epr} required the prefix to be in the form $\exists * \forall *$ which was achieved by Skolemization to remove all the existentially quantified variables and it also required there to be no function symbols which was achieved by lifting the functions to predicates. This result can then be used as the input to an \gls{epr} solver to determine its satisfiability. Because each step in the process preserved satisfiability proving (or disproving) the satisfiability of the \gls{epr} output gives the satisfiability of the original \gls{qbf} input.
 
-This is our example \gls{qbf}~\ref{qbf:3} after lifting its functions to predicates
-\begin{equation} \label{qbf:3}
+Formula~\ref{qbf:4} is formula~\ref{qbf:3} after lifting its functions to predicates.
+
+\begin{equation} \label{qbf:4}
 \begin{aligned}
 &\forall w \forall x \forall y\\
 &(p(y) \lor p_z(w, x, y)) &\land\\
@@ -71,15 +75,20 @@ The standard dependency scheme is harder to define so this description will not 
 
 We will look at the idea of dependency from the opposite perspective; given a variable, say $x$, what variables depend on $x$? We must first define $R(x)$ to be the all the existential variables quantified to the right of $x$. Then we have a notion of dependency pairs in which two variables $x$ and $y$ (with $y$ quantified to the right of $x$) form a dependency pair $(x,y)$ if they are 'connected' with respect to $R(x)$. The two variables $x$ and $y$ are connected with respect to $R(x)$ if in the incidence graph of the formula there exists a path through the graph from a clause containing $x$ to a clause containing $y$ that only travels through clauses that contain at least one variable in $R(x)$. The incidence graph is a bipartite graph with a variable joined to a clause if the variable is in the clause. A path starts at one clause, travels to a variable in $R(x)$ and from that variable travels to a clause and so on until it reaches a clause containing $y$. Trivially, if $x$ and $y$ are in the same clause then $y$ depends on $x$.
 
-The incidence graph of our example formula is below. Trivially we can see that $z$ depends on both $x$ and $y$ because it appears in clauses with both of them but compared to the trivial dependency scheme it hasn't given $w$ as a dependency of $z$ because there is no path from $w$ to $z$ in the graph traveling only through clauses containing variables in the set $R(w)=\left \{z\right \}$, the only way to do so is to go via $x$ which is not in $R(w)$. Despite being quantified to the right of $w$, $x$ was quantified universally so it is not included.
+Figure~\ref{bigrapheasy} is the incidence graph of formula~\ref{qbf:1}. Trivially we can see that $z$ depends on both $x$ and $y$ because it appears in clauses with both of them but compared to the trivial dependency scheme it hasn't given $w$ as a dependency of $z$ because there is no path from $w$ to $z$ in the graph traveling only through clauses containing variables in the set $R(w)=\left \{z\right \}$, the only way to do so is to go via $x$ which is not in $R(w)$. Despite being quantified to the right of $w$, $x$ was quantified universally so it is not included.
 
-\begin{center}
+\begin{figure}
+\begin{CenteredBox}
 \input{bigrapheasy.tex}
-\end{center}
+\end{CenteredBox}
+\caption{Bipartite graph for formula~\ref{qbf:1}}
+\label{bigrapheasy}
+\end{figure}
 
-To see less obvious dependencies with the standard dependency scheme we need a slightly more complex example. Consider the following formula.
+To see less obvious dependencies with the standard dependency scheme we need a slightly more complex example. Consider formula~\ref{hardformula}.
 
 \begin{equation}
+\label{hardformula}
 \begin{aligned}
 &\forall u \exists v \forall w \exists x \forall y \exists z\\
 &(u \lor \neg v \lor x) &\land\\
@@ -91,12 +100,16 @@ To see less obvious dependencies with the standard dependency scheme we need a s
 \end{aligned}
 \end{equation}
 
-This formula has the following bipartite graph.
+The graph for formula~\ref{hardformula} is figure~\ref{bigraphhard}.
 
-\begin{center}
+\begin{figure}
+\begin{CenteredBox}
 \input{bigraphhard.tex}
-\end{center}
+\end{CenteredBox}
+\caption{Bipartite graph for formula~\ref{hardformula}}
+\label{bigraphhard}
+\end{figure}
 
 It is not obvious from the formula that under the standard dependency scheme that $z$ depends on $u$. However in this case $R(u)=\left \{v, x, z\right \}$ and a path starting at the clause $(v \lor z)$ can travel through $v$ (because it is in $R(u)$) and thus reach the clause $(u \lor \neg v \lor x)$ which contains $u$. This is the path labeled in dashed lines on the graph. We can also see that $z$ does not depend on $w$ as a path to $w$ must travel through $x$ or $y$, neither of which are in $R(w)$.
 
-The standard dependency scheme is tractable \cite{backdoorsets} because we can work backwards from a given variable $x$ to see what variables depend on it doing a linear search across the graph and upon finding a variable that matches the criteria it is added to the list of variables that depend on $x$. 
+The standard dependency scheme is tractable (full proof by Samer and Szeider~\cite{backdoorsets}) because we can work backwards from a given variable $x$ to see what variables depend on it doing a linear search across the graph and upon finding a variable that matches the criteria it is added to the list of variables that depend on $x$. 

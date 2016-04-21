@@ -1,5 +1,4 @@
 \chapter{Development}
-\todo[inline]{Development goes here}
 This chapter will describe the design and implementation of \textit{qbftoepr} at a high level with some of the technical choices and why they were made as well as some of the optimizations and compromises that were taken to improve performance.
 
 \section{Language Choice}
@@ -13,14 +12,31 @@ The project was implemented in the language OCaml~\cite{ocaml} which is a functi
 
 Even without these advantages OCaml would be a suitable language given that it has been designed with performance as a priority and has excellent built-in functions for manipulating lists of which the project makes extensive use.
 
+This chapter will contain snippets of (simplified) OCaml code so some understanding of the syntax is required. Most of the syntax is straightforward with the exception that function arguments don't require brackets and functions always return the result of their last command.
+
+\begin{figure}
+\caption{Factorial example}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=ocamlex]
+let rec factorial n =
+  if n <= 1 then 1
+  else n * factorial (n - 1)
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
+
+The factorial example~\ref{ocamlex} illustrates some of these features. In the if statement the last command executed is \texttt{1} so the function returns \texttt{1} in that case. If the else statement is reached then the result of the multiplication is returned. The call to \texttt{factorial} in the multiplication is passed one argument; the result of \texttt{(n-1)}.
+
 \section{Input and Output Formats}
 The input and output formats were an important choice but one that was relatively easy to make. The decision was to go with the standards already in use by other theorem provers to be able to compare \textit{qbftoepr} to them on exactly the same inputs. Another consideration was that the input format had to have a relatively simple grammar to simplify the input handling and the output format had to be simple enough to make printing the output efficient. The output format must also be accepted as an input format by iProver.
 
 \subsection{QDIMACS}
 QDIMACS~\cite{qdimacs} is the input format decided on for \textit{qbftoepr}. It is the format used by the QBFLIB~\cite{qbflib} which is a library of \gls{qbf} problem instances. QBFLIB also holds a competition called QBFEVAL which tests \gls{qbf} solvers against each other using the QDIMACS format. This makes it the standard of the \gls{qbf} research community and a clear choice of input format for \textit{qbftoepr}. It also opens access to the QBFLIB problem library providing test cases of all difficulty scales and the results of other solvers on these test cases. It also has a very simple grammar meaning that parsing a QDIMACS input is simple.
 
-Below is our example from chapter~\ref{chapter:2} in QDIMACS form.
-\begin{lstlisting}
+\begin{figure}
+\caption{QDIMACS example}
+\begin{CenteredBox}
+\begin{lstlisting}[label=qdimacsex]
 c this is a comment
 p cnf 4 3
 a 1 2 3 0
@@ -29,24 +45,47 @@ e 4 0
 2 -4 0
 -2 1 0
 \end{lstlisting}
-Lines beginning with \textit{c} are comments, \textit{p} denotes the problem line which tells us the problem is in \gls{cnf} and has four variables and three clauses. Lines prefixed with \textit{a} are universally quantified variables, \textit{e} are existential. Lines after the prefix form the matrix which is the list of clauses. Numbers represent variables and a negative number represents the negative literal of that variable, i.e. $\bar{l}$. The prefix and matrix lines are appended with a zero as a line terminator.
+\end{CenteredBox}
+\end{figure}
+Figure~\ref{qdimacsex} is the example from chapter~\ref{chapter:qbftoepr} in QDIMACS form. Lines beginning with \texttt{c} are comments, \texttt{p} denotes the problem line which tells us the problem is in \gls{cnf} and has four variables and three clauses. Lines prefixed with \texttt{a} are universally quantified variables, \texttt{e} are existential. Lines after the prefix form the matrix which is the list of clauses. Numbers represent variables and a negative number represents the negative literal of that variable, i.e. $\bar{l}$. The prefix and matrix lines are appended with a zero as a line terminator.
 
 \subsection{TPTP}
 The output format chosen for \textit{qbftoepr} is TPTP~\cite{tptp}. Similarly to QBFLIB, the TPTP is a large problem library for automated theorem proving and as such it is one of the input formats that iProver accepts. The popularity of the TPTP library means it is also used by other automated theorem provers. Because the TPTP is a general problem library (whereas QBFLIB is specifically \gls{qbf} problems) its grammar is very complicated. However \textit{qbftoepr} does not need to parse it to output it and only requires a small subset of the format's features to output the result of the \gls{epr} conversion process.
 
-Below is the example from chapter~\ref{chapter:2} after being converted to \gls{epr} in the TPTP output format.
-\begin{lstlisting}
+\begin{figure}
+\caption{TPTP example}
+\begin{CenteredBox}
+\begin{lstlisting}[label=tptpex]
 cnf(cl_0,plain,(p(X3) | p_f_4(X1,X2,X3))).
 cnf(cl_1,plain,(p(X2) | ~p_f_4(X1,X2,X3))).
 cnf(cl_2,plain,(~p(X2) | p(X1))).
 cnf(cl_3,plain,(p(true))).
 cnf(cl_4,plain,(~p(false))).
 \end{lstlisting}
-Each line is a clause, named \textit{cl\_x} where x is an identifier. Following is the \textit{plain} keyword which says there are no user defined semantics then the list of literals where \textit{\textasciitilde} denotes the negation of a literal.
+\end{CenteredBox}
+\end{figure}
+Figure~\ref{tptpex} is the example from chapter~\ref{chapter:qbftoepr} after being converted to \gls{epr} in the TPTP output format. Each line is a clause, named \texttt{cl\_x} where x is an identifier. Following is the \texttt{plain} keyword which says there are no user defined semantics then the list of literals where \texttt{\textasciitilde} denotes the negation of a literal.
 
 \section{Data Structures}
+The design of the data structures is very important because it determines the functions that can be used to manipulate them. OCaml has excellent built in support for lists so \textit{qbftoepr} makes extensive use of lists in its data structures. It is also important to avoid too much nesting of types to minimise the extra code required to delve into the type structure.
+
+A \texttt{qbf} and a \texttt{fol\_qbf} (first order logic \gls{qbf}) have the same basic structure. They are formed of a \texttt{record} type which can be though of as similar to a \texttt{struct} in C like languages; they have several typed fields. These records have a \texttt{prefix} and a \texttt{matrix} which are defined as a list of the \texttt{quantified\_variable} and \texttt{clause} types respectively. The \texttt{quantified\_variable}\todo{make sure it doesn't overflow} type is another record which has information about the quantification level, the quantifier and the variable. The \texttt{clause} type is defined as a list of \texttt{literal}s and the \texttt{literal} level is where the regular \texttt{qbf} and \texttt{fol\_qbf} start to differ. A \texttt{literal} is a record with the sign (positive or negative) and either a \texttt{variable} (an integer) in the case of a regular \texttt{qbf} or a \texttt{predicate} in the case of a \texttt{fol\_qbf}.
+
+A \texttt{predicate} has a name and a list of arguments which are either a \texttt{variable}, a \texttt{func}, \texttt{true} or \texttt{false}. A \texttt{func} also has a name and a list of arguments but it only takes \texttt{variable} arguments. This extra complexity in the \texttt{literal}s of \texttt{fol\_qbf}s drives some important optimization decisions that will be discussed in section~\ref{optimizations}.
 
 \section{Implementation}
+This section will tie together the theoretical background from chapter~\ref{chapter:qbftoepr} with the practicalities of implementation.
+
+\subsection{Input \& Output}
+Input is handled by the OCaml variants of the Lex and Yacc tools for C called OCamllex and OCamlyacc. Tokens are defined with regular expressions and the input text is matched to the regular expressions and parsed into tokens. The tokens are given to code that builds the \texttt{qbf} data structure out of the input which is then passed to the main body of the code. The simplicity of the QDIMACS grammar was helpful here to keep the regular expressions and token structure simple.
+
+Outputting the result in TPTP is fairly straightforward. The \gls{epr} result is just a list of clauses so given the \texttt{fol\_qbf} the \texttt{prefix} can be discarded and each \texttt{clause} in the \texttt{matrix} list can simply be printed to the output file.
+
+\subsection{Raising to First Order Logic}
+Raising a \texttt{qbf} to a \texttt{fol\_qbf} is a relatively simple procedure. The idea is to delve into the \texttt{prefix} and \texttt{matrix} lists of the \texttt{qbf} and copy the values into the \texttt{fol\_qbf} record.
+
+The \texttt{quantified\_variable} types can be copied verbatim as they do not change between \texttt{qbf} and \texttt{fol\_qbf} but the \texttt{literal}s require more care. When a \texttt{literal} is found the sign is copied and the \texttt{variable} is added as the argument to a new \texttt{predicate} which is copied into the new \texttt{literal}.
+
 \subsection{Skolemization}
 \subsection{Removing Functions}
 \subsection{Dependency Scheme Construction}
@@ -55,8 +94,7 @@ Each line is a clause, named \textit{cl\_x} where x is an identifier. Following 
 % skolemization: finding existential variables linear in the length of the prefix n, then one linear search of the matrix for each variable found, another n*m? (n*m)^2? disclaimer this might be wrong
 % removing functions is linear in the number of clauses (and in their length?)? replacing functions with predicates one by one
 
-\section{Optimizations}
-
-\section{Future Work}
-\subsection{Dependency Scheme Optimizations}
-\subsection{Anti-prenexing}
+\section{Optimizations} \label{optimizations}
+\subsection{Skolemization}
+\subsection{Printing TPTP}
+\subsection{Dependency Schemes}

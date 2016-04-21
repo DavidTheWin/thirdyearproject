@@ -9,6 +9,12 @@
 \usepackage{url}
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{fancybox}
+
+\makeatletter
+\newenvironment{CenteredBox}{
+\begin{Sbox}}{\end{Sbox}\centerline{\parbox{\wd\@Sbox}{\TheSbox}}}
+\makeatother
 
 \usetikzlibrary{positioning,chains,fit,shapes,calc}
 
@@ -17,8 +23,7 @@
 \makenoidxglossaries
 
 \newdate{submissiondate}{03}{05}{2016}
-\newdateformat{monthyear}{%
-  \monthname[\THEMONTH], \THEYEAR}
+\newdateformat{monthyear}{\monthname[\THEMONTH], \THEYEAR}
 
 \begin{document}
 
@@ -33,6 +38,7 @@
 \input{qbftoepr.tex}
 \input{development.tex}
 \input{evaluation.tex}
+\input{futurework.tex}
 \input{conclusion.tex}
 
 \input{bibliography.tex}
