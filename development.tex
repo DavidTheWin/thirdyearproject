@@ -2,7 +2,7 @@
 This chapter will describe the design and implementation of \textit{qbftoepr} at a high level with some of the technical choices and why they were made as well as some of the optimizations and compromises that were taken to improve performance.
 
 \section{Language Choice}
-The project was implemented in the language OCaml~\cite{ocaml} which is a functional language notable for the language extensions that give it object oriented and imperative functionality. The main motivator for implementing \textit{qbftoepr} in OCaml is the fact that iProver is implemented in OCaml which provides three advantages:
+The project was implemented in the language OCaml~\cite{ocaml} which is a functional language notable for the language extensions that give it object oriented and imperative functionality. The main motivation for implementing \textit{qbftoepr} in OCaml is the fact that iProver is implemented in OCaml which provides three advantages:
 
 \begin{itemize}
 \item Code from iProver can be re-used easily in \textit{qbftoepr}\\
@@ -12,9 +12,9 @@ The project was implemented in the language OCaml~\cite{ocaml} which is a functi
 
 Even without these advantages OCaml would be a suitable language given that it has been designed with performance as a priority and has excellent built-in functions for manipulating lists of which the project makes extensive use.
 
-This chapter will contain snippets of (simplified) OCaml code so some understanding of the syntax is required. Most of the syntax is straightforward with the exception that function arguments don't require brackets and functions always return the result of their last command.
+This chapter will contain snippets of (simplified) OCaml code so some understanding of the syntax is required. Most of the syntax is straightforward with the exception that function arguments don't require brackets and functions always return the result of their last command. The \texttt{match} feature is used to handle custom types by comparing a variable against a list of types and defining actions to perform in the case of each of the types. OCaml variables are also immutable by default so code is written in a way that creates new data structures and populates them with the changes to the data from the original data structures rather than modifying the original data structures directly.
 
-\begin{figure}
+\begin{figure}[h]
 \caption{Factorial example}
 \begin{CenteredBox}
 \begin{lstlisting}[language=caml, label=ocamlex]
@@ -33,7 +33,7 @@ The input and output formats were an important choice but one that was relativel
 \subsection{QDIMACS}
 QDIMACS~\cite{qdimacs} is the input format decided on for \textit{qbftoepr}. It is the format used by the QBFLIB~\cite{qbflib} which is a library of \gls{qbf} problem instances. QBFLIB also holds a competition called QBFEVAL which tests \gls{qbf} solvers against each other using the QDIMACS format. This makes it the standard of the \gls{qbf} research community and a clear choice of input format for \textit{qbftoepr}. It also opens access to the QBFLIB problem library providing test cases of all difficulty scales and the results of other solvers on these test cases. It also has a very simple grammar meaning that parsing a QDIMACS input is simple.
 
-\begin{figure}
+\begin{figure}[h]
 \caption{QDIMACS example}
 \begin{CenteredBox}
 \begin{lstlisting}[label=qdimacsex]
@@ -52,7 +52,7 @@ Figure~\ref{qdimacsex} is the example from chapter~\ref{chapter:qbftoepr} in QDI
 \subsection{TPTP}
 The output format chosen for \textit{qbftoepr} is TPTP~\cite{tptp}. Similarly to QBFLIB, the TPTP is a large problem library for automated theorem proving and as such it is one of the input formats that iProver accepts. The popularity of the TPTP library means it is also used by other automated theorem provers. Because the TPTP is a general problem library (whereas QBFLIB is specifically \gls{qbf} problems) its grammar is very complicated. However \textit{qbftoepr} does not need to parse it to output it and only requires a small subset of the format's features to output the result of the \gls{epr} conversion process.
 
-\begin{figure}
+\begin{figure}[h]
 \caption{TPTP example}
 \begin{CenteredBox}
 \begin{lstlisting}[label=tptpex]
@@ -66,12 +66,12 @@ cnf(cl_4,plain,(~p(false))).
 \end{figure}
 Figure~\ref{tptpex} is the example from chapter~\ref{chapter:qbftoepr} after being converted to \gls{epr} in the TPTP output format. Each line is a clause, named \texttt{cl\_x} where x is an identifier. Following is the \texttt{plain} keyword which says there are no user defined semantics then the list of literals where \texttt{\textasciitilde} denotes the negation of a literal.
 
-\section{Data Structures}
-The design of the data structures is very important because it determines the functions that can be used to manipulate them. OCaml has excellent built in support for lists so \textit{qbftoepr} makes extensive use of lists in its data structures. It is also important to avoid too much nesting of types to minimise the extra code required to delve into the type structure.
+\section{Data Structures} \label{datastructures}
+The design of the data structures is very important because it determines the functions that can be used to manipulate them. OCaml has excellent built in support for lists so \textit{qbftoepr} makes extensive use of lists in its data structures. It is also important to avoid too much nesting of types to minimize the extra code required to delve into the type structure.
 
-A \texttt{qbf} and a \texttt{fol\_qbf} (first order logic \gls{qbf}) have the same basic structure. They are formed of a \texttt{record} type which can be though of as similar to a \texttt{struct} in C like languages; they have several typed fields. These records have a \texttt{prefix} and a \texttt{matrix} which are defined as a list of the \texttt{quantified\_variable} and \texttt{clause} types respectively. The \texttt{quantified\_variable}\todo{make sure it doesn't overflow} type is another record which has information about the quantification level, the quantifier and the variable. The \texttt{clause} type is defined as a list of \texttt{literal}s and the \texttt{literal} level is where the regular \texttt{qbf} and \texttt{fol\_qbf} start to differ. A \texttt{literal} is a record with the sign (positive or negative) and either a \texttt{variable} (an integer) in the case of a regular \texttt{qbf} or a \texttt{predicate} in the case of a \texttt{fol\_qbf}.
+A \texttt{qbf} and a \texttt{fol\_qbf} (first order logic \gls{qbf}) have the same basic structure. They are formed of a \texttt{record} type which can be though of as similar to a \texttt{struct} in C like languages; they have several typed fields. These records have a \texttt{prefix} and a \texttt{matrix} which are defined as a list of the \texttt{quantified\_variable} and \texttt{clause} types respectively. The \texttt{quantified\_variable} type is another record which has information about the quantification level, the quantifier and the variable. The \texttt{clause} type is defined as a list of \texttt{literal}s and the \texttt{literal} level is where the regular \texttt{qbf} and \texttt{fol\_qbf} start to differ. A \texttt{literal} is a record with the sign (positive or negative) and either an \texttt{atom} (another name for a variable) in the case of a regular \texttt{qbf} or a \texttt{predicate} in the case of a \texttt{fol\_qbf}.
 
-A \texttt{predicate} has a name and a list of arguments which are either a \texttt{variable}, a \texttt{func}, \texttt{true} or \texttt{false}. A \texttt{func} also has a name and a list of arguments but it only takes \texttt{variable} arguments. This extra complexity in the \texttt{literal}s of \texttt{fol\_qbf}s drives some important optimization decisions that will be discussed in section~\ref{optimizations}.
+A \texttt{predicate} has a name and a list of arguments which are either an \texttt{atom}, a \texttt{func}, \texttt{true} or \texttt{false}. A \texttt{func} also has a name and a list of arguments but it only takes \texttt{atom} arguments. This extra complexity in the \texttt{literal}s of \texttt{fol\_qbf}s drives some important optimization decisions that will be discussed in section~\ref{optimizations}.
 
 \section{Implementation}
 This section will tie together the theoretical background from chapter~\ref{chapter:qbftoepr} with the practicalities of implementation.
@@ -84,17 +84,192 @@ Outputting the result in TPTP is fairly straightforward. The \gls{epr} result is
 \subsection{Raising to First Order Logic}
 Raising a \texttt{qbf} to a \texttt{fol\_qbf} is a relatively simple procedure. The idea is to delve into the \texttt{prefix} and \texttt{matrix} lists of the \texttt{qbf} and copy the values into the \texttt{fol\_qbf} record.
 
-The \texttt{quantified\_variable} types can be copied verbatim as they do not change between \texttt{qbf} and \texttt{fol\_qbf} but the \texttt{literal}s require more care. When a \texttt{literal} is found the sign is copied and the \texttt{variable} is added as the argument to a new \texttt{predicate} which is copied into the new \texttt{literal}.
+The \texttt{quantified\_variable} types can be copied verbatim as they do not change between \texttt{qbf} and \texttt{fol\_qbf} but the \texttt{literal}s require more care. When a \texttt{literal} is found the sign is copied and the \texttt{atom} is added as the argument to a new \texttt{predicate} which is copied into the new \texttt{literal}.
+
+The simplified OCaml code snippet~\ref{raisingtofol} shows the raising process. The \texttt{matrix} is iterated through using \texttt{List.map} which applies the given function to each element in the list and puts the result into a new list. When a \texttt{literal} is found either a positive or negative \texttt{literal} is created with the \texttt{atom} from the old \texttt{literal}. The raising process introduces two new \texttt{clause}s which are appended to the \texttt{matrix}.
+
+\begin{figure}[h]
+\caption{Raising to first order logic}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=raisingtofol]
+let convert_qbf_to_fol qbf =
+  {prefix = convert_qbf_prefix_to_fol qbf.qbf_prefix;
+   matrix = 
+     convert_matrix_to_fol qbf.qbf_matrix 
+     @ clauses_for_introduced_predicate}
+
+let convert_matrix_to_fol qbf_matrix =
+  List.map convert_clause_to_fol qbf_matrix
+
+let convert_clause_to_fol clause =
+  List.map convert_literal_to_fol clause
+
+let convert_literal_to_fol literal =
+  match literal.sign with
+    Pos -> make_pos_literal 
+      (make_predicate fol_pred_name [Atom(literal.atom)])
+  | Neg -> make_neg_literal 
+      (make_predicate fol_pred_name [Atom(literal.atom)])
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
 
 \subsection{Skolemization}
+Skolemization is the more algorithmically challenging stage of the \gls{qbf} to \gls{epr} conversion process. Section~\ref{skolemization} discussed the background; replace each existential variable with a Skolem function. The implementation first builds an association list (a list of key value pairs) with the existential variables for keys and the Skolem function that will replace them as the values, this is also when the Skolem functions are built. The original \texttt{matrix} is then linearly scanned with its values being copied into a new \texttt{matrix} but with the instances of the variable keys in the association list replaced by the Skolem function value that corresponds to that key. This new \texttt{matrix} and a new \texttt{prefix} with all the existential variables removed are returned as the Skolemized \texttt{fol\_qbf}.
+
+Code snippet~\ref{skolemizationimpl} shows some of the implementation of Skolemization. Of note are the functions \texttt{build\_skolem\_func\_list} and \texttt{get\_skolemized\_predicate}. The first recursively builds the association list with the \texttt{prefix} reduced by one existential variable at each point, returning the current association list or an empty list in the base case where the prefix has no existential variables. The latter makes the assumption that the predicate has only one argument that is an \texttt{atom}, this assumption and others like it will be discussed in the optimizations section~\ref{optimizations}.
+
+\begin{figure}[h]
+\caption{Skolemization}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=skolemizationimpl]
+let skolemization fol_qbf dep_scheme =
+  let skolem_list = build_skolem_func_list fol_qbf.prefix dep_scheme in
+  build_fol_qbf
+  (prefix_without_existential_variables fol_qbf.prefix)
+  (get_skolemized_matrix fol_qbf.matrix skolem_list)
+
+let rec build_skolem_func_list prefix dep_scheme =
+  try
+    let outermost = List.find (fun var -> var.quantifier = E) prefix in
+    let func_args = List.assoc outermost.atom dep_scheme in
+    [outermost.atom, build_skolem_function outermost func_args]
+    @ (build_skolem_func_list 
+        (prefix_without_quantifier prefix outermost) 
+        dep_scheme)
+  with Not_found -> []
+
+let get_skolemized_matrix matrix skolem_list =
+  List.map (get_skolemized_clause skolem_list) matrix
+
+let get_skolemized_clause skolem_list clause =
+  List.map (get_skolemized_literal skolem_list) clause
+
+let get_skolemized_literal skolem_list literal =
+  {sign = literal.sign; 
+   pred = get_skolemized_predicate skolem_list literal.pred}
+
+let get_skolemized_predicate skolem_list predicate =
+  let atom = List.hd predicate.pred_arguments in
+  match atom with
+    Atom(n) ->
+      make_predicate
+      predicate.pred_name
+      (replace_atom_with_skolem_func n skolem_list)
+  | _ -> predicate
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
+
 \subsection{Removing Functions}
-\subsection{Dependency Scheme Construction}
-\subsection{Complexity}
-% raising to fol is linear in the number of clauses (and in their length?)? just translate symbols one at a time plus two extra clauses but that's dominated by the linearity of the symbol translation
-% skolemization: finding existential variables linear in the length of the prefix n, then one linear search of the matrix for each variable found, another n*m? (n*m)^2? disclaimer this might be wrong
-% removing functions is linear in the number of clauses (and in their length?)? replacing functions with predicates one by one
+Removing the \texttt{func}s from the \texttt{fol\_qbf} is straightforward. the \texttt{matrix} is iterated over once and when a \texttt{func} is found a new \texttt{predicate} is created with the \texttt{func}'s arguments to be used in the new \texttt{matrix}. This is similar to the process of replacing existential variables with a Skolem function during Skolemization. The simplified OCaml listing~\ref{removingfunctionsimpl} shows the replacement process. When a \texttt{literal} is reached if its predicate matches a \texttt{func} the new \texttt{predicate} is generated otherwise the original \texttt{predicate} is returned.
+
+\begin{figure}[h]
+\caption{Removing Functions}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=removingfunctionsimpl]
+let remove_functions_from_fol_qbf fol_qbf =
+  let new_matrix = remove_functions_from_matrix fol_qbf.matrix in
+  build_fol_qbf fol_qbf.prefix new_matrix
+
+let remove_functions_from_matrix matrix =
+  List.map remove_functions_from_clause matrix
+
+let remove_functions_from_clause clause =
+  List.map remove_function_from_literal clause
+
+let remove_function_from_literal literal =
+  {sign = literal.sign; 
+   predicate = remove_function_from_predicate literal.predicate}
+
+let remove_function_from_predicate predicate =
+  match List.hd predicate.predicate_arguments with
+    Func(f) -> raise_function_to_predicate f
+  | _ -> predicate
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
+
+\subsection{Dependency Scheme Construction} \label{devdepscheme}
+A dependency scheme is implemented as an association list where the key is the variable and the value is a list of the variables that the key depends on.
+
+The trivial dependency scheme is a matter of finding all \texttt{quantified\_variable}s quantified universally before a given existential \texttt{quantified\_variable}. This is implemented by filtering the \texttt{prefix} to just the \texttt{quantified\_variable}s with both the universal quantifier and a lower \texttt{quant\_level} than the given variable. The implementation of this filtering is shown in the snipper~\ref{trivialdepschemeimpl}. This is performed on every existential \texttt{quantified\_variable} and compiled into the association list.
+
+\begin{figure}[h]
+\caption{Trivial Dependency Scheme}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=trivialdepschemeimpl]
+let universally_quantified_below_quant_level prefix quant_level =
+  List.filter (universally_quantified_before quant_level) prefix
+
+let universally_quantified_before quant_level var =
+  var.quantifier = A && var.quant_level < quant_level
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
+
+The optimal implementation for the standard dependency scheme involves a graph search as described in section~\ref{stddepscheme} however time constraints necessitated a more straightforward but less efficient implementation. The trade-offs are discussed more in section~\ref{tractablestddepscheme}, this section concentrates on the current implementation.
+
+The current implementation of the standard dependency scheme searches through the \texttt{matrix} for clauses containing the given variable. This creates a new \texttt{matrix}-like structure that must be flattened to give the list of variables in the same clauses as the given variable. This list is then further pruned to just those variables that were universally quantified before the given variable which gives a list of the variables it depends on. However this list must be filtered once more to remove the duplicate variables which is accomplished using the List module's \texttt{sort\_uniq} function. An extract of this implementation can be seen in the code snippet~\ref{stddepschemeimpl} which omits some boilerplate code around converting between \texttt{atom}s and \texttt{quantified\_variables}.
+
+This implementation is not correct; it misses some dependencies. The example formula~\ref{hardformula} in section~\ref{stddepscheme} shows a non-obvious dependency that this implementation would miss. A fix for this is discussed in section~\ref{tractablestddepscheme}.
+
+\begin{figure}[h]
+\caption{Standard Dependency Scheme}
+\begin{CenteredBox}
+\begin{lstlisting}[language=caml, label=stddepschemeimpl]
+let std_dep_scheme_for_variable qbf var =
+  let all_potential_atoms =
+   List.sort_uniq
+     compare_atoms
+     (atoms_of_clauses (clauses_containing_atom var.variable qbf.matrix)) in
+  [var.variable,
+   List.filter
+     (universally_quantified_before_variable qbf.prefix var)
+     all_potential_atoms]
+
+let universally_quantified_before_variable prefix var_one atom_two =
+  let quant_var_two = quantified_variable_for_atom atom_two prefix in
+  universally_quantified_before var_one.quant_level quant_var_two
+
+let clause_contains_atom atom clause =
+  List.exists (fun literal -> literal.atom = atom) clause
+
+let clauses_containing_atom atom matrix =
+  List.filter (clause_contains_atom atom) matrix
+\end{lstlisting}
+\end{CenteredBox}
+\end{figure}
+
+\section{Complexity}
+Realistic formulas can easily run into tens or hundreds of thousands of variables so reducing the complexity is a priority in order to keep the runtime tractable.
+
+\subsection{Raising to First Order Logic}
+Raising the \texttt{qbf} to \texttt{fol\_qbf} runs in time linear in the length of the formula. The \texttt{prefix} can be copied directly and the \texttt{matrix} is scanned once building a new \texttt{matrix} with \texttt{predicate}s for the new \texttt{matrix} created from the \texttt{atom}s of the old \texttt{matrix} in a one to one correspondence. Two new clauses are added but this is a constant time factor so can be ignored.
+
+\subsection{Skolemization}
+The Skolemization algorithm first builds the Skolem variable association list. This runs in time linear to the length of the prefix because one function is created per existential variable. The function creation takes constant time, the name is created from the predicate's name and the variable's name and the function's arguments are given by the dependency scheme's association list.
+
+Replacing the variables in the \texttt{matrix} runs in time proportional to the length of the \texttt{matrix} multiplied by the length of the Skolem list created in the first step which is itself proportional to the length of the \texttt{prefix}. The \texttt{matrix} is only scanned once but every \texttt{literal} must be checked to see if its variable is in the Skolem list which must be scanned once to find it.
+
+\subsection{Removing Functions}
+Removing the functions from a \texttt{matrix} runs in time linear in the length of the formula. The original \texttt{matrix} is iterated over once and when a \texttt{func} is found a new \texttt{predicate} is created and used in its place in the new \texttt{matrix}.
+
+\subsection{Dependency Schemes} \label{depschemecomplexity}
+The trivial dependency scheme is computed in linear time. The \texttt{prefix} is scanned once for variables matching the criteria of being universally quantified before the given variable.
+
+The current implementation of the standard dependency scheme is not very well optmised. An optimization is discussed in section~\ref{tractablestddepscheme}. The current implementation performs one pass over the \texttt{matrix} to build the list of variables in the same clause as the given variable and has to repeat this for every existential variable. Therefore it runs in time proportional to the length of the \texttt{matrix} multiplied by the length of the \texttt{prefix}.
 
 \section{Optimizations} \label{optimizations}
+The first working implementation had many inefficiencies which had to be optimized to properly evaluate the project. The performance gains from these optimizations will be examined in detail in chapter~\ref{evaluation}. This section will outline which optimizations were made.
+
 \subsection{Skolemization}
+The original implementation of Skolemization was closer to the theoretical idea of Skolemization wherein the instances of an existential variable are replaced by Skolem functions repeated for each existential variable. However this approach rebuilds the entire \texttt{matrix} at each step which is an incredibly costly operation. The current implementation performs only one rebuilding of the \texttt{matrix} after computing the variables to be replaced and the Skolem functions replacing them up front rather than when needed.
+
+Another smaller optimization is the way that a \texttt{predicate}'s arguments are scanned. Because the arguments must be implemented as a list the original implementation scanned this list of arguments to replace them individually with a Skolem function or to check if they are a function that must be removed. However at this stage in the conversion process the \texttt{predicate} can only ever have one argument so it suffices to look only at the head of the list. Despite the list only having one element it is actually faster to look only at the head rather than scan the list to find only the single element. This technique is used in the two aforementioned places and can be seen in the relevant code snippets \ref{skolemizationimpl} and \ref{removingfunctionsimpl}.
+
 \subsection{Printing TPTP}
+To print a \texttt{clause} in TPTP format the literals must be combined into a string. This was originally implemented with a string builder using the List module's \texttt{fold\_left} function that scans a list accumulating a result along the way which was the concatenation of the \texttt{literal}s in the \texttt{clause}. The disadvantage of folding operations is that they can tend to be memory intensive and on some larger problems the memory usage exceeded reasonable limits. The implementation was changed to use a regular concatenation method which gave a significant performance increase alongside the reduced memory usage.
+
 \subsection{Dependency Schemes}
+At first only the trivial dependency scheme was implemented and was calculated when needed during Skolemization. Refactoring was required to implement the standard dependency scheme and to make the dependency scheme computation general enough to be able to add more dependency schemes in future. This meant moving the dependency scheme into the current association list created before Skolemization takes place and passed to it as an argument. The dependencies are also computed on the \texttt{qbf} data structure rather than the \texttt{fol\_qbf} data structure because the \texttt{qbf}'s \texttt{literal}s are much more simple, just a record type with a \texttt{sign} and an \texttt{atom} which saves operations to extract data from the \texttt{predicate}s of the \texttt{fol\_qbf}.
