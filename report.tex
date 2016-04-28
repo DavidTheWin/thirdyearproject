@@ -11,6 +11,8 @@
 \usepackage{tikz}
 \usepackage{fancybox}
 \usepackage[htt]{hyphenat}
+\usepackage[toc,page]{appendix}
+%\usepackage{cite}
 
 \makeatletter
 \newenvironment{CenteredBox}{
@@ -43,7 +45,14 @@
 \input{conclusion.tex}
 
 \input{bibliography.tex}
+%\bibliography{bibl}
+%\bibliographystyle{plain}
 
 \printnoidxglossaries
+
+\begin{appendices}
+\input{problems.tex}
+\input{trivialvsstandard.tex}
+\end{appendices}
 
 \end{document}
