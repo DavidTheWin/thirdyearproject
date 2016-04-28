@@ -38,7 +38,7 @@ An NP problem is one that can be solved by a non-deterministic algorithm that ru
 \subsection{QBF is PSPACE-complete}
 A PSPACE problem is one that can be solved by a deterministic algorithm that runs using space in memory relative to a polynomial of the size of the input. \Gls{qbf} belongs to this complexity class and can be shown to be PSPACE-complete using Savitch's theorem~\cite{savitch}. NP problems are a subset of PSPACE problems and it is not yet known if the two classes are equal or not. Because these algorithms run much slower than general \gls{sat} algorithms there has been much less interest in \gls{qbf} solvers outside academia compared to \gls{sat} solvers.
 
-\subsection{EPR is NEXPTIME-complete}
+\subsection{EPR is NEXPTIME-complete} \label{eprnexptime}
 Similarly to NP problems, NEXPTIME problems are solved by non deterministic algorithms running in time relative to an exponential of the size of the input. \Gls{epr} was shown to be NEXPTIME-complete by Harry Lewis in 1980~\cite{harrylewis}. While this does mean that algorithms for proving satisfiability of \gls{epr} are in general slower than algorithms for propositional satisfiability we are still interested to see how \gls{epr} solvers fare when given inputs derived from \glspl{qbf}.
 
 \section{Automated Reasoning}
