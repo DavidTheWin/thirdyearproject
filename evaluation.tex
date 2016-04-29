@@ -30,10 +30,10 @@ The standard scheme does produce significantly smaller results than the trivial 
 \includegraphics{trivialsizeoverstandardsize.png}
 \end{center}
 
-Given that this implementation of the standard dependency scheme misses some dependencies the correct filesize is slightly higher but not enough to break this relationship.
+Given that this implementation of the standard dependency scheme misses some dependencies the correct file size is slightly higher but not enough to break this relationship.
 
 \subsection{Time to Solve} \label{tvsstdsolve}
-The hope is that the smaller problems are faster for iProver to solve and that this speed improvement outweighs the defecit introduced by the longer conversion time. This proved to be harder to show but can be loosely inferred from a single result. The problem \texttt{s27\_d5\_u-shuffled} is the smallest problem in the harder data set with 478 clauses. Using the trivial scheme took 0.015 seconds to convert to \gls{epr} with an output filesize of 117 Kilobytes and using the standard scheme took 0.021 seconds with an output of 26 Kilobytes. However, iProver took only 147.12 seconds to solve the standard result but had not solved the trivial result after an hour of processing. This shows that the extra time taken to convert using the standard dependency scheme is vastly outweighed by the time taken to solve in iProver on sufficiently large problems. To test this inference further the same test was carried out using the easy set of benchmarks but the difference here was negligible on the easy problems with only a hundred clauses.
+The hope is that the smaller problems are faster for iProver to solve and that this speed improvement outweighs the deficit introduced by the longer conversion time. This proved to be harder to show but can be loosely inferred from a single result. The problem \texttt{s27\_d5\_u-shuffled} is the smallest problem in the harder data set with 478 clauses. Using the trivial scheme took 0.015 seconds to convert to \gls{epr} with an output file-size of 117 Kilobytes and using the standard scheme took 0.021 seconds with an output of 26 Kilobytes. However, iProver took only 147.12 seconds to solve the standard result but had not solved the trivial result after an hour of processing. This shows that the extra time taken to convert using the standard dependency scheme is vastly outweighed by the time taken to solve in iProver on sufficiently large problems. To test this inference further the same test was carried out using the easy set of benchmarks but the difference here was negligible on the easy problems with only a hundred clauses.
 
 \section{Comparison Against a Direct QBF Solver}
 As mentioned to in section~\ref{eprnexptime}, in theory solving \gls{epr} is slower than solving the \gls{qbf} directly. The results agreed with this theory. Solving via converting with \textit{qbftoepr} and solving the \gls{epr} with iProver was approximately an order of magnitude slower than solving the problem directly with DepQBF. The full results can be seen in appendix~\ref{depqbfvsqbftoepr}. 
@@ -43,3 +43,12 @@ As mentioned to in section~\ref{eprnexptime}, in theory solving \gls{epr} is slo
 \end{center}
 
 \section{Comparison Against an EPR Converter}
+The trivial dependency scheme is used throughout these tests as it is the only scheme implemented in qbf2epr so it is used when testing \textit{qbftoepr} to give a better comparison. Since the two converters give identical output (aside from differences in variable names) only the conversion time is examined as the differences in time taken for iProver to solve the output would be negligible. The results show that the conversion time of qbf2epr increases linearly with the number of clauses whereas \textit{qbftoepr} increases with the square of the number of clauses. This means that as the problem size increases the algorithmic inefficiencies in \textit{qbftoepr} lead to a significant time difference, up to 20 times slower in the largest problem. However on the smaller problem sets \textit{qbftoepr} is almost an order of magnitude faster than qbf2epr suggesting that if it were improved it could be significantly faster on larger problem sets.
+
+\begin{center}
+\includegraphics{qbftoeprvsqbf2eprhard.png}
+\end{center}
+
+\begin{center}
+\includegraphics{qbftoeprvsqbf2epreasy.png}
+\end{center}
