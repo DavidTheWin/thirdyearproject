@@ -1,0 +1,14 @@
+\begin{tikzpicture}
+\begin{axis}[
+  title=Time to Solve Hard Set,
+  xlabel=Number of Clauses,
+  ylabel=Time in Seconds,
+  grid=major,
+  legend pos=north west,
+]
+\addplot[blue] table {dat/trivialtimehard.dat};
+\addplot[red] table {dat/standardtimehard.dat};
+\addlegendentry{Trivial}
+\addlegendentry{Standard}
+\end{axis}
+\end{tikzpicture}

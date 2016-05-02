@@ -1,0 +1,16 @@
+\begin{tikzpicture}
+\begin{axis}[
+  title=Standard Duration over Trivial Duration (seconds),
+  xlabel=Number of Clauses,
+  ylabel=Ratio,
+  grid=major,
+  legend pos=north west,
+]
+\addplot[blue] table {dat/standarddurationovertrivialduration.dat};
+\addplot[blue,dashed] table [
+  y=create col/linear regression={y=f(x)}
+] {dat/standarddurationovertrivialduration.dat};
+\addlegendentry{Ratio}
+\addlegendentry{Linear}
+\end{axis}
+\end{tikzpicture}

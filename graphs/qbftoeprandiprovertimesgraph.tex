@@ -1,0 +1,14 @@
+\begin{tikzpicture}
+\begin{axis}[
+  title=\textit{qbftoepr} and iProver Times,
+  xlabel=Number of Clauses,
+  ylabel=Time in Seconds,
+  grid=major,
+  legend pos=north west,
+]
+\addplot[blue, mark=*] table {dat/qbftoepreasy.dat};
+\addplot[red, mark=*] table {dat/iprovereasy.dat};
+\addlegendentry{\textit{qbftoepr}}
+\addlegendentry{iProver}
+\end{axis}
+\end{tikzpicture}

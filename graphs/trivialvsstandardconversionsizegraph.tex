@@ -1,0 +1,14 @@
+\begin{tikzpicture}
+\begin{axis}[
+  title=Output File-Size,
+  xlabel=Number of Clauses,
+  ylabel=Size in Megabytes,
+  grid=major,
+  legend pos=north west,
+]
+\addplot[blue] table {dat/trivialsizehard.dat};
+\addplot[red] table {dat/standardsizehard.dat};
+\addlegendentry{Trivial}
+\addlegendentry{Standard}
+\end{axis}
+\end{tikzpicture}
