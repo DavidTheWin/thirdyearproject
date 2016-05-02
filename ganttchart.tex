@@ -1,4 +1,32 @@
 \chapter{Gantt Chart} \label{ganttchart}
 \begin{center}
-\includegraphics[angle=90,origin=c,scale=0.69]{ganttchart.png}
+\begin{ganttchart}[
+  vgrid,
+  hgrid,
+  x unit = 0.39cm,
+  y unit chart = 0.78cm,
+  milestone label font=\bfseries
+]{1}{24}
+\gantttitle{Semester 1}{12}
+\gantttitle{Semester 2}{12}\\
+\gantttitlelist{1,...,12}{1}
+\gantttitlelist{1,...,12}{1}\\
+
+\ganttbar{Create plan}{1}{1}\\
+\ganttbar{Learn OCaml}{1}{2}\\
+\ganttbar{Handle Input}{2}{5}\\
+\ganttbar{Prepare for Seminar}{6}{9}\\
+\ganttmilestone{Seminar}{9}\\
+\ganttbar{Skolemization}{6}{10}\\
+\ganttbar{Removing Functions}{10}{12}\\
+
+\ganttbar{Output TPTP}{13}{15}\\
+\ganttbar{Prepare Results}{16}{17}\\
+\ganttmilestone{Demonstration}{17}\\
+\ganttbar{Optimizations}{15}{18}\\
+\ganttbar{Finishing Touches}{19}{19}\\
+\ganttmilestone{Code Deadline}{19}\\
+\ganttbar{Report and Screencast}{20}{23}\\
+\ganttmilestone{Final Deadline}{23}
+\end{ganttchart}
 \end{center}

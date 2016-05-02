@@ -1,8 +1,8 @@
 \chapter{Evaluation} \label{evaluation}
-This chapter discusses the evaluation of \textit{qbftoepr} starting with the automated testing to determine the functionality is correct then benchmarks against other \gls{qbf} solvers and also against \textit{qbf2epr}, a tool that also converts \gls{qbf} to \gls{epr}.
+This chapter discusses the evaluation of \textit{qbftoepr} starting with the automated testing then benchmarks against other \gls{qbf} solvers and against \textit{qbf2epr}, a tool that also converts \gls{qbf} to \gls{epr}.
 
 \section{Automated Testing}
-Automated testing was implemented using the OUnit library which is an OCaml analogue of JUnit for Java. Each function was tested individually against valid and invalid inputs to determine whether the code behaved correctly then linked together in integration tests to test the sections of the algorithm (such as Skolemization) from the top level. Each update to the code also updated the tests if required and ensured that the tests were passing before the code was committed.
+Automated testing was implemented using the OUnit library which is an OCaml analogue of JUnit for Java. Each function was tested individually against valid and invalid inputs to determine whether the code behaved correctly then linked together in integration tests to test the sections of the algorithm (such as Skolemization) from the top level. Each update to the code also updated the tests if required and ensured that the tests passed before the code was committed.
 
 \section{Testing Methodology}
 Two test sets were selected from the QBFLIB 2010 problem library. The first was an easy set consisting of four easier problems with fewer clauses and the second was a more difficult set of sixteen harder problems with orders of magnitude more clauses. The exact problems are listed in appendix~\ref{qbfproblemsets}.
@@ -28,7 +28,7 @@ As expected using the standard dependency scheme means the conversion takes sign
 \end{figure}
 
 \subsection{Size of Result}
-The standard scheme does produce significantly smaller results than the trivial scheme. The relationship is similar to that in the time taken to convert with the inverse ratio. We look at the ratio of the size of the trivial scheme result over the size of the standard scheme result. In the smallest cases the standard scheme is at least four to five times smaller but can be as much as two hundred times smaller for larger problems. Again there is a linear relationship between the number of clauses and this ratio. As the number of clauses doubles, the ratio of trivial size over standard size doubles too, shown in the graph~\ref{trivialsizeoverstandardsize}.
+The standard scheme does produce significantly smaller results than the trivial scheme. The relationship is similar to the ratio discussed in the time taken to convert. We look at the ratio of the size of the trivial scheme result over the size of the standard scheme result. In the smallest cases the standard scheme is at least four to five times smaller but can be as much as two hundred times smaller for larger problems. Again there is a linear relationship between the number of clauses and this ratio. As the number of clauses doubles, the ratio of trivial size over standard size doubles too, shown in the graph~\ref{trivialsizeoverstandardsize}.
 
 \begin{figure}[h]
 \caption{Ratio of trivial over standard duration}
@@ -44,11 +44,11 @@ Given that this implementation of the standard dependency scheme misses some dep
 The hope is that the smaller problems are faster for iProver to solve and that this speed improvement outweighs the deficit introduced by the longer conversion time. This proved to be harder to show but can be loosely inferred from a single result. The problem \texttt{s27\_d5\_u-shuffled} is the smallest problem in the harder data set with 478 clauses. Using the trivial scheme took 0.015 seconds to convert to \gls{epr} with an output file-size of 117 Kilobytes and using the standard scheme took 0.021 seconds with an output of 26 Kilobytes. However, iProver took only 147.12 seconds to solve the standard result but had not solved the trivial result after an hour of processing. This shows that the extra time taken to convert using the standard dependency scheme is vastly outweighed by the time taken to solve in iProver on sufficiently large problems. To test this inference further the same test was carried out using the easy set of benchmarks but the difference here was negligible on the easy problems with only a hundred clauses.
 
 \section{Comparison Against a Direct QBF Solver}
-As mentioned to in section~\ref{eprnexptime}, in theory solving \gls{epr} is slower than solving the \gls{qbf} directly. The results agreed with this theory. Solving via converting with \textit{qbftoepr} and solving the \gls{epr} with iProver was approximately an order of magnitude slower than solving the problem directly with DepQBF. This is shown in the graph~\ref{depqbfvsqbftoepr} with the full results in appendix~\ref{depqbfvsqbftoepr}.
+As mentioned to in section~\ref{eprnexptime}, in theory solving \gls{epr} is slower than solving the \gls{qbf} directly. The results agreed with this theory. Solving via converting with \textit{qbftoepr} and solving the \gls{epr} with iProver was approximately an order of magnitude slower than solving the problem directly with DepQBF. This is shown in the graph~\ref{depqbfvsqbftoeprgraph} with the full results in appendix~\ref{depqbfvsqbftoepr}.
 
 \begin{figure}[h]
 \caption{DepQBF vs. \textit{qbftoepr} time}
-\label{depqbfvsqbftoepr}
+\label{depqbfvsqbftoeprgraph}
 \begin{CenteredBox}
 \includegraphics{depqbfvsqbftoepr.png}
 \end{CenteredBox}
