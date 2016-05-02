@@ -1,0 +1,21 @@
+\begin{lstlisting}[language=caml, label=stddepschemeimpl]
+let std_dep_scheme_for_variable qbf var =
+  let all_potential_atoms =
+   List.sort_uniq
+     compare_atoms
+     (atoms_of_clauses (clauses_containing_atom var.variable qbf.matrix)) in
+  [var.variable,
+   List.filter
+     (universally_quantified_before_variable qbf.prefix var)
+     all_potential_atoms]
+
+let universally_quantified_before_variable prefix var_one atom_two =
+  let quant_var_two = quantified_variable_for_atom atom_two prefix in
+  universally_quantified_before var_one.quant_level quant_var_two
+
+let clause_contains_atom atom clause =
+  List.exists (fun literal -> literal.atom = atom) clause
+
+let clauses_containing_atom atom matrix =
+  List.filter (clause_contains_atom atom) matrix
+\end{lstlisting}

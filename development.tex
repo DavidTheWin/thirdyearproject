@@ -17,11 +17,7 @@ This chapter will contain snippets of (simplified) OCaml code so some understand
 \begin{figure}[H]
 \caption{Factorial example}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=ocamlex]
-let rec factorial n =
-  if n <= 1 then 1
-  else n * factorial (n - 1)
-\end{lstlisting}
+\input{listings/factorial.tex}
 \end{CenteredBox}
 \end{figure}
 
@@ -36,17 +32,10 @@ QDIMACS~\cite{qdimacs} is the input format supported by \textit{qbftoepr}. It is
 \begin{figure}[H]
 \caption{QDIMACS example}
 \begin{CenteredBox}
-\begin{lstlisting}[label=qdimacsex]
-c this is a comment
-p cnf 4 3
-a 1 2 3 0
-e 4 0
-3 4 0
-2 -4 0
--2 1 0
-\end{lstlisting}
+\input{listings/qdimacs.tex}
 \end{CenteredBox}
 \end{figure}
+
 Figure~\ref{qdimacsex} is the example from chapter~\ref{chapter:qbftoepr} in QDIMACS form. Lines beginning with \texttt{c} are comments, \texttt{p} denotes the problem line which tells us the problem is in \gls{cnf} and has four variables and three clauses. Lines prefixed with \texttt{a} are universally quantified variables, \texttt{e} are existential. Lines after the prefix form the matrix which is the list of clauses. Numbers represent variables and a negative number represents the negative literal of that variable, i.e. $\bar{l}$. The prefix and matrix lines are appended with a zero as a line terminator.
 
 \subsection{TPTP}
@@ -55,15 +44,10 @@ The output format chosen for \textit{qbftoepr} is TPTP~\cite{tptp}. Similarly to
 \begin{figure}[H]
 \caption{TPTP example}
 \begin{CenteredBox}
-\begin{lstlisting}[label=tptpex]
-cnf(cl_0,plain,(p(X3) | p_f_4(X1,X2,X3))).
-cnf(cl_1,plain,(p(X2) | ~p_f_4(X1,X2,X3))).
-cnf(cl_2,plain,(~p(X2) | p(X1))).
-cnf(cl_3,plain,(p(true))).
-cnf(cl_4,plain,(~p(false))).
-\end{lstlisting}
+\input{listings/tptp.tex}
 \end{CenteredBox}
 \end{figure}
+
 Figure~\ref{tptpex} is the example from chapter~\ref{chapter:qbftoepr} after being converted to \gls{epr} in the TPTP output format. Each line is a clause, named \texttt{cl\_x} where x is an identifier. Following is the \texttt{plain} keyword which says there are no user defined semantics then the list of literals where \texttt{\textasciitilde} denotes the negation of a literal.
 
 \section{Data Structures} \label{datastructures}
@@ -91,26 +75,7 @@ The simplified OCaml code snippet~\ref{raisingtofol} shows the raising process. 
 \begin{figure}[H]
 \caption{Raising to first order logic}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=raisingtofol]
-let convert_qbf_to_fol qbf =
-  {prefix = convert_qbf_prefix_to_fol qbf.qbf_prefix;
-   matrix = 
-     convert_matrix_to_fol qbf.qbf_matrix 
-     @ clauses_for_introduced_predicate}
-
-let convert_matrix_to_fol qbf_matrix =
-  List.map convert_clause_to_fol qbf_matrix
-
-let convert_clause_to_fol clause =
-  List.map convert_literal_to_fol clause
-
-let convert_literal_to_fol literal =
-  match literal.sign with
-    Pos -> make_pos_literal 
-      (make_predicate fol_pred_name [Atom(literal.atom)])
-  | Neg -> make_neg_literal 
-      (make_predicate fol_pred_name [Atom(literal.atom)])
-\end{lstlisting}
+\input{listings/raisetofol.tex}
 \end{CenteredBox}
 \end{figure}
 
@@ -122,42 +87,7 @@ Code snippet~\ref{skolemizationimpl} shows some of the implementation of Skolemi
 \begin{figure}[H]
 \caption{Skolemization}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=skolemizationimpl]
-let skolemization fol_qbf dep_scheme =
-  let skolem_list = build_skolem_func_list fol_qbf.prefix dep_scheme in
-  build_fol_qbf
-  (prefix_without_existential_variables fol_qbf.prefix)
-  (get_skolemized_matrix fol_qbf.matrix skolem_list)
-
-let rec build_skolem_func_list prefix dep_scheme =
-  try
-    let outermost = List.find (fun var -> var.quantifier = E) prefix in
-    let func_args = List.assoc outermost.atom dep_scheme in
-    [outermost.atom, build_skolem_function outermost func_args]
-    @ (build_skolem_func_list 
-        (prefix_without_quantifier prefix outermost) 
-        dep_scheme)
-  with Not_found -> []
-
-let get_skolemized_matrix matrix skolem_list =
-  List.map (get_skolemized_clause skolem_list) matrix
-
-let get_skolemized_clause skolem_list clause =
-  List.map (get_skolemized_literal skolem_list) clause
-
-let get_skolemized_literal skolem_list literal =
-  {sign = literal.sign; 
-   pred = get_skolemized_predicate skolem_list literal.pred}
-
-let get_skolemized_predicate skolem_list predicate =
-  let atom = List.hd predicate.pred_arguments in
-  match atom with
-    Atom(n) ->
-      make_predicate
-      predicate.pred_name
-      (replace_atom_with_skolem_func n skolem_list)
-  | _ -> predicate
-\end{lstlisting}
+\input{listings/skolemization.tex}
 \end{CenteredBox}
 \end{figure}
 
@@ -167,26 +97,7 @@ Removing the \texttt{func}s from the \texttt{fol\_qbf} is straightforward. the \
 \begin{figure}[H]
 \caption{Removing Functions}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=removingfunctionsimpl]
-let remove_functions_from_fol_qbf fol_qbf =
-  let new_matrix = remove_functions_from_matrix fol_qbf.matrix in
-  build_fol_qbf fol_qbf.prefix new_matrix
-
-let remove_functions_from_matrix matrix =
-  List.map remove_functions_from_clause matrix
-
-let remove_functions_from_clause clause =
-  List.map remove_function_from_literal clause
-
-let remove_function_from_literal literal =
-  {sign = literal.sign; 
-   predicate = remove_function_from_predicate literal.predicate}
-
-let remove_function_from_predicate predicate =
-  match List.hd predicate.predicate_arguments with
-    Func(f) -> raise_function_to_predicate f
-  | _ -> predicate
-\end{lstlisting}
+\input{listings/removingfunctions.tex}
 \end{CenteredBox}
 \end{figure}
 
@@ -198,13 +109,7 @@ The trivial dependency scheme is a matter of finding all \texttt{quantified\_var
 \begin{figure}[H]
 \caption{Trivial Dependency Scheme}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=trivialdepschemeimpl]
-let universally_quantified_below_quant_level prefix quant_level =
-  List.filter (universally_quantified_before quant_level) prefix
-
-let universally_quantified_before quant_level var =
-  var.quantifier = A && var.quant_level < quant_level
-\end{lstlisting}
+\input{listings/trivial.tex}
 \end{CenteredBox}
 \end{figure}
 
@@ -217,27 +122,7 @@ This implementation is not correct; it misses some dependencies. The example for
 \begin{figure}[H]
 \caption{Standard Dependency Scheme}
 \begin{CenteredBox}
-\begin{lstlisting}[language=caml, label=stddepschemeimpl]
-let std_dep_scheme_for_variable qbf var =
-  let all_potential_atoms =
-   List.sort_uniq
-     compare_atoms
-     (atoms_of_clauses (clauses_containing_atom var.variable qbf.matrix)) in
-  [var.variable,
-   List.filter
-     (universally_quantified_before_variable qbf.prefix var)
-     all_potential_atoms]
-
-let universally_quantified_before_variable prefix var_one atom_two =
-  let quant_var_two = quantified_variable_for_atom atom_two prefix in
-  universally_quantified_before var_one.quant_level quant_var_two
-
-let clause_contains_atom atom clause =
-  List.exists (fun literal -> literal.atom = atom) clause
-
-let clauses_containing_atom atom matrix =
-  List.filter (clause_contains_atom atom) matrix
-\end{lstlisting}
+\input{listings/standard.tex}
 \end{CenteredBox}
 \end{figure}
 

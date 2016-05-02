@@ -1,0 +1,7 @@
+\begin{lstlisting}[language=caml, label=trivialdepschemeimpl]
+let universally_quantified_below_quant_level prefix quant_level =
+  List.filter (universally_quantified_before quant_level) prefix
+
+let universally_quantified_before quant_level var =
+  var.quantifier = A && var.quant_level < quant_level
+\end{lstlisting}

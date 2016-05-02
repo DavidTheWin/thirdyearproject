@@ -1,0 +1,20 @@
+\begin{lstlisting}[language=caml, label=removingfunctionsimpl]
+let remove_functions_from_fol_qbf fol_qbf =
+  let new_matrix = remove_functions_from_matrix fol_qbf.matrix in
+  build_fol_qbf fol_qbf.prefix new_matrix
+
+let remove_functions_from_matrix matrix =
+  List.map remove_functions_from_clause matrix
+
+let remove_functions_from_clause clause =
+  List.map remove_function_from_literal clause
+
+let remove_function_from_literal literal =
+  {sign = literal.sign; 
+   predicate = remove_function_from_predicate literal.predicate}
+
+let remove_function_from_predicate predicate =
+  match List.hd predicate.predicate_arguments with
+    Func(f) -> raise_function_to_predicate f
+  | _ -> predicate
+\end{lstlisting}

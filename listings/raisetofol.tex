@@ -1,0 +1,20 @@
+\begin{lstlisting}[language=caml, label=raisingtofol]
+let convert_qbf_to_fol qbf =
+  {prefix = convert_qbf_prefix_to_fol qbf.qbf_prefix;
+   matrix = 
+     convert_matrix_to_fol qbf.qbf_matrix 
+     @ clauses_for_introduced_predicate}
+
+let convert_matrix_to_fol qbf_matrix =
+  List.map convert_clause_to_fol qbf_matrix
+
+let convert_clause_to_fol clause =
+  List.map convert_literal_to_fol clause
+
+let convert_literal_to_fol literal =
+  match literal.sign with
+    Pos -> make_pos_literal 
+      (make_predicate fol_pred_name [Atom(literal.atom)])
+  | Neg -> make_neg_literal 
+      (make_predicate fol_pred_name [Atom(literal.atom)])
+\end{lstlisting}

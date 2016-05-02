@@ -1,0 +1,36 @@
+\begin{lstlisting}[language=caml, label=skolemizationimpl]
+let skolemization fol_qbf dep_scheme =
+  let skolem_list = build_skolem_func_list fol_qbf.prefix dep_scheme in
+  build_fol_qbf
+  (prefix_without_existential_variables fol_qbf.prefix)
+  (get_skolemized_matrix fol_qbf.matrix skolem_list)
+
+let rec build_skolem_func_list prefix dep_scheme =
+  try
+    let outermost = List.find (fun var -> var.quantifier = E) prefix in
+    let func_args = List.assoc outermost.atom dep_scheme in
+    [outermost.atom, build_skolem_function outermost func_args]
+    @ (build_skolem_func_list 
+        (prefix_without_quantifier prefix outermost) 
+        dep_scheme)
+  with Not_found -> []
+
+let get_skolemized_matrix matrix skolem_list =
+  List.map (get_skolemized_clause skolem_list) matrix
+
+let get_skolemized_clause skolem_list clause =
+  List.map (get_skolemized_literal skolem_list) clause
+
+let get_skolemized_literal skolem_list literal =
+  {sign = literal.sign; 
+   pred = get_skolemized_predicate skolem_list literal.pred}
+
+let get_skolemized_predicate skolem_list predicate =
+  let atom = List.hd predicate.pred_arguments in
+  match atom with
+    Atom(n) ->
+      make_predicate
+      predicate.pred_name
+      (replace_atom_with_skolem_func n skolem_list)
+  | _ -> predicate
+\end{lstlisting}
