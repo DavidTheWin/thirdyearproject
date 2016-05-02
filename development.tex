@@ -16,12 +16,15 @@ This chapter will contain snippets of (simplified) OCaml code so some understand
 
 \begin{figure}[H]
 \caption{Factorial example}
+\label{factorialexample}
 \begin{CenteredBox}
 \input{listings/factorial.tex}
 \end{CenteredBox}
 \end{figure}
 
-The factorial example~\ref{ocamlex} illustrates some of these features. In the if statement the last command executed is \texttt{1} so the function returns \texttt{1} in that case. If the else statement is reached then the result of the multiplication is returned. The call to \texttt{factorial} in the multiplication is passed one argument; the result of \texttt{(n-1)}.
+The factorial example~\ref{factorialexample} illustrates some of these features. In the if statement the last command executed is \texttt{1} so the function returns \texttt{1} in that case. If the else statement is reached then the result of the multiplication is returned. The call to \texttt{factorial} in the multiplication is passed one argument; the result of \texttt{(n-1)}.
+
+All code listings can be found in the appendix~\ref{codelistings}.
 
 \section{Input and Output Formats}
 The input and output formats were an important choice but one that was relatively easy to make. The decision was to go with the standards already in use by other theorem provers to be able to compare \textit{qbftoepr} to them on exactly the same inputs. Another consideration was that the input format had to have a relatively simple grammar to simplify the input handling and the output format had to be simple enough to make printing the output efficient. The output format must also be accepted as an input format by iProver.
@@ -31,24 +34,26 @@ QDIMACS~\cite{qdimacs} is the input format supported by \textit{qbftoepr}. It is
 
 \begin{figure}[H]
 \caption{QDIMACS example}
+\label{qdimacsexample}
 \begin{CenteredBox}
 \input{listings/qdimacs.tex}
 \end{CenteredBox}
 \end{figure}
 
-Figure~\ref{qdimacsex} is the example from chapter~\ref{chapter:qbftoepr} in QDIMACS form. Lines beginning with \texttt{c} are comments, \texttt{p} denotes the problem line which tells us the problem is in \gls{cnf} and has four variables and three clauses. Lines prefixed with \texttt{a} are universally quantified variables, \texttt{e} are existential. Lines after the prefix form the matrix which is the list of clauses. Numbers represent variables and a negative number represents the negative literal of that variable, i.e. $\bar{l}$. The prefix and matrix lines are appended with a zero as a line terminator.
+Figure~\ref{qdimacsexample} is the example from chapter~\ref{chapter:qbftoepr} in QDIMACS form. Lines beginning with \texttt{c} are comments, \texttt{p} denotes the problem line which tells us the problem is in \gls{cnf} and has four variables and three clauses. Lines prefixed with \texttt{a} are universally quantified variables, \texttt{e} are existential. Lines after the prefix form the matrix which is the list of clauses. Numbers represent variables and a negative number represents the negative literal of that variable, i.e. $\bar{l}$. The prefix and matrix lines are appended with a zero as a line terminator.
 
 \subsection{TPTP}
 The output format chosen for \textit{qbftoepr} is TPTP~\cite{tptp}. Similarly to QBFLIB, the TPTP is a large problem library for automated theorem proving and as such it is one of the input formats that iProver accepts. The popularity of the TPTP library means it is also used by other automated theorem provers. Because the TPTP is a general problem library (whereas QBFLIB is specifically \gls{qbf} problems) its grammar is very complicated. However \textit{qbftoepr} does not need to parse it and it only requires a small subset of the format's features to output the result of the \gls{epr} conversion process.
 
 \begin{figure}[H]
 \caption{TPTP example}
+\label{tptpexample}
 \begin{CenteredBox}
 \input{listings/tptp.tex}
 \end{CenteredBox}
 \end{figure}
 
-Figure~\ref{tptpex} is the example from chapter~\ref{chapter:qbftoepr} after being converted to \gls{epr} in the TPTP output format. Each line is a clause, named \texttt{cl\_x} where x is an identifier. Following is the \texttt{plain} keyword which says there are no user defined semantics then the list of literals where \texttt{\textasciitilde} denotes the negation of a literal.
+Figure~\ref{tptpexample} is the example from chapter~\ref{chapter:qbftoepr} after being converted to \gls{epr} in the TPTP output format. Each line is a clause, named \texttt{cl\_x} where x is an identifier. Following is the \texttt{plain} keyword which says there are no user defined semantics then the list of literals where \texttt{\textasciitilde} denotes the negation of a literal.
 
 \section{Data Structures} \label{datastructures}
 The design of the data structures is very important because it determines the functions that can be used to manipulate them. OCaml has excellent built in support for lists so \textit{qbftoepr} makes extensive use of lists in its data structures. It is also important to avoid too much nesting of types to minimize the extra code required to delve into the type structure.
@@ -70,10 +75,11 @@ Raising a \texttt{qbf} to a \texttt{fol\_qbf} is a relatively simple procedure. 
 
 The \texttt{quantified\_variable} types can be copied verbatim as they do not change between \texttt{qbf} and \texttt{fol\_qbf} but the \texttt{literal}s require more care. When a \texttt{literal} is found the sign is copied and the \texttt{atom} is added as the argument to a new \texttt{predicate} which is copied into the new \texttt{literal}.
 
-The simplified OCaml code snippet~\ref{raisingtofol} shows the raising process. The \texttt{matrix} is iterated through using \texttt{List.map} which applies the given function to each element in the list and puts the result into a new list. When a \texttt{literal} is found either a positive or negative \texttt{literal} is created with the \texttt{atom} from the old \texttt{literal}. The raising process introduces two new \texttt{clause}s which are appended to the \texttt{matrix}.
+The simplified OCaml code snippet~\ref{raisetofol} shows the raising process. The \texttt{matrix} is iterated through using \texttt{List.map} which applies the given function to each element in the list and puts the result into a new list. When a \texttt{literal} is found either a positive or negative \texttt{literal} is created with the \texttt{atom} from the old \texttt{literal}. The raising process introduces two new \texttt{clause}s which are appended to the \texttt{matrix}.
 
 \begin{figure}[H]
 \caption{Raising to first order logic}
+\label{raisetofol}
 \begin{CenteredBox}
 \input{listings/raisetofol.tex}
 \end{CenteredBox}
@@ -82,20 +88,22 @@ The simplified OCaml code snippet~\ref{raisingtofol} shows the raising process. 
 \subsection{Skolemization}
 Skolemization is the more algorithmically challenging stage of the \gls{qbf} to \gls{epr} conversion process. Section~\ref{skolemization} discussed the background; replace each existential variable with a Skolem function. The implementation first builds an association list (a list of key value pairs) with the existential variables for keys and the Skolem function that will replace them as the values (this is also when the Skolem functions are built). The original \texttt{matrix} is then linearly scanned with its values being copied into a new \texttt{matrix} but with the instances of the variable keys in the association list replaced by the Skolem function value that corresponds to that key. This new \texttt{matrix} and a new \texttt{prefix} with all the existential variables removed are returned as the Skolemized \texttt{fol\_qbf}.
 
-Code snippet~\ref{skolemizationimpl} shows some of the implementation of Skolemization. Of note are the functions \texttt{build\_skolem\_func\_list} and \texttt{get\_skolemized\_predicate}. The first recursively builds the association list with the \texttt{prefix} reduced by one existential variable at each point, returning the current association list or an empty list in the base case where the prefix has no existential variables. The latter makes the assumption that the predicate has only one argument that is an \texttt{atom}, this assumption and others like it will be discussed in the optimizations section~\ref{optimizations}.
+Code snippet~\ref{skolemizationimplementation} shows some of the implementation of Skolemization. Of note are the functions \texttt{build\_skolem\_func\_list} and \texttt{get\_skolemized\_predicate}. The first recursively builds the association list with the \texttt{prefix} reduced by one existential variable at each point, returning the current association list or an empty list in the base case where the prefix has no existential variables. The latter makes the assumption that the predicate has only one argument that is an \texttt{atom}, this assumption and others like it will be discussed in the optimizations section~\ref{optimizations}.
 
 \begin{figure}[H]
 \caption{Skolemization}
+\label{skolemizationimplementation}
 \begin{CenteredBox}
 \input{listings/skolemization.tex}
 \end{CenteredBox}
 \end{figure}
 
 \subsection{Removing Functions}
-Removing the \texttt{func}s from the \texttt{fol\_qbf} is straightforward. the \texttt{matrix} is iterated over once and when a \texttt{func} is found a new \texttt{predicate} is created with the \texttt{func}'s arguments to be used in the new \texttt{matrix}. This is similar to the process of replacing existential variables with a Skolem function during Skolemization. The simplified OCaml listing~\ref{removingfunctionsimpl} shows the replacement process. When a \texttt{literal} is reached if its predicate matches a \texttt{func} the new \texttt{predicate} is generated otherwise the original \texttt{predicate} is returned.
+Removing the \texttt{func}s from the \texttt{fol\_qbf} is straightforward. the \texttt{matrix} is iterated over once and when a \texttt{func} is found a new \texttt{predicate} is created with the \texttt{func}'s arguments to be used in the new \texttt{matrix}. This is similar to the process of replacing existential variables with a Skolem function during Skolemization. The simplified OCaml listing~\ref{removingfunctionsimplementation} shows the replacement process. When a \texttt{literal} is reached if its predicate matches a \texttt{func} the new \texttt{predicate} is generated otherwise the original \texttt{predicate} is returned.
 
 \begin{figure}[H]
 \caption{Removing Functions}
+\label{removingfunctionsimplementation}
 \begin{CenteredBox}
 \input{listings/removingfunctions.tex}
 \end{CenteredBox}
@@ -104,10 +112,11 @@ Removing the \texttt{func}s from the \texttt{fol\_qbf} is straightforward. the \
 \subsection{Dependency Scheme Construction} \label{devdepscheme}
 A dependency scheme is implemented as an association list where the key is the variable and the value is a list of the variables that the key depends on.
 
-The trivial dependency scheme is a matter of finding all \texttt{quantified\_variable}s quantified universally before a given existential \texttt{quantified\_variable}. This is implemented by filtering the \texttt{prefix} to just the \texttt{quantified\_variable}s with both the universal quantifier and a lower \texttt{quant\_level} than the given variable. The implementation of this filtering is shown in the code snippet~\ref{trivialdepschemeimpl}. This is performed on every existential \texttt{quantified\_variable} and compiled into the association list.
+The trivial dependency scheme is a matter of finding all \texttt{quantified\_variable}s quantified universally before a given existential \texttt{quantified\_variable}. This is implemented by filtering the \texttt{prefix} to just the \texttt{quantified\_variable}s with both the universal quantifier and a lower \texttt{quant\_level} than the given variable. The implementation of this filtering is shown in the code snippet~\ref{trivialdepschemeimplementation}. This is performed on every existential \texttt{quantified\_variable} and compiled into the association list.
 
 \begin{figure}[H]
 \caption{Trivial Dependency Scheme}
+\label{trivialdepschemeimplementation}
 \begin{CenteredBox}
 \input{listings/trivial.tex}
 \end{CenteredBox}
@@ -115,12 +124,13 @@ The trivial dependency scheme is a matter of finding all \texttt{quantified\_var
 
 The optimal implementation for the standard dependency scheme involves a graph search as described in section~\ref{stddepscheme} however time constraints necessitated a more straightforward but less efficient implementation. The trade-offs are discussed more in section~\ref{tractablestddepscheme}, this section concentrates on the current implementation.
 
-The current implementation of the standard dependency scheme searches through the \texttt{matrix} for clauses containing the given variable. This creates a new \texttt{matrix}-like structure that must be flattened to give the list of variables in the same clauses as the given variable. This list is then further pruned to just those variables that were universally quantified before the given variable which gives a list of the variables it depends on. However this list must be filtered once more to remove the duplicate variables which is accomplished using the List module's \texttt{sort\_uniq} function. An extract of this implementation can be seen in the code snippet~\ref{stddepschemeimpl} which omits some boilerplate code around converting between \texttt{atom}s and \texttt{quantified\_variables}.
+The current implementation of the standard dependency scheme searches through the \texttt{matrix} for clauses containing the given variable. This creates a new \texttt{matrix}-like structure that must be flattened to give the list of variables in the same clauses as the given variable. This list is then further pruned to just those variables that were universally quantified before the given variable which gives a list of the variables it depends on. However this list must be filtered once more to remove the duplicate variables which is accomplished using the List module's \texttt{sort\_uniq} function. An extract of this implementation can be seen in the code snippet~\ref{stddepschemeimplementation} which omits some boilerplate code around converting between \texttt{atom}s and \texttt{quantified\_variables}.
 
 This implementation is not correct; it misses some dependencies. The example formula~\ref{hardformula} in section~\ref{stddepscheme} shows a non-obvious dependency that this implementation would miss. A fix for this is discussed in section~\ref{tractablestddepscheme}.
 
 \begin{figure}[H]
 \caption{Standard Dependency Scheme}
+\label{stddepschemeimplementation}
 \begin{CenteredBox}
 \input{listings/standard.tex}
 \end{CenteredBox}
