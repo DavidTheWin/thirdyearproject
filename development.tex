@@ -156,7 +156,7 @@ The trivial dependency scheme is computed in linear time. The \texttt{prefix} is
 The current implementation of the standard dependency scheme is not very well optimized. An optimization is discussed in section~\ref{tractablestddepscheme}. The current implementation performs one pass over the \texttt{matrix} to build the list of variables in the same clause as the given variable and has to repeat this for every existential variable. Therefore it runs in time proportional to the length of the \texttt{matrix} multiplied by the length of the \texttt{prefix}.
 
 \section{Optimizations} \label{optimizations}
-The first working implementation had many inefficiencies which had to be optimized to properly evaluate the project. The performance gains from these optimizations will be examined in detail in chapter~\ref{evaluation}. This section will outline the optimizations that were implemented.
+The first working implementation had many inefficiencies which had to be optimized to properly evaluate the project. This section will outline the optimizations that were implemented.
 
 \subsection{Skolemization}
 The original implementation of Skolemization was closer to the theoretical idea of Skolemization wherein the instances of an existential variable are replaced by Skolem functions and this process is repeated for each existential variable. However this approach rebuilds the entire \texttt{matrix} at each step which is an incredibly costly operation. The current implementation performs only one rebuilding of the \texttt{matrix} after computing the variables to be replaced and the Skolem functions replacing them up front rather than when needed.
