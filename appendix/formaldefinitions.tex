@@ -1,0 +1,20 @@
+\chapter{Formal Definitions} \label{formaldefinitions}
+
+\section{Propositional Logic}
+First define the language $\mathcal{L}(A, \Omega, Z, I)$. The set $A$ is the alphabet; the set of variables that can be used in formulas. The set $\Omega$ is the set of operators of various arities. The set $Z$ is the inference rules and $I$ is the set of logical axioms.
+
+Formulas are defined by saying that any element of $A$ is a formula and if $p_1,p_2,\dotsc,p_n$ are formulas and $f \in \Omega$ is a logical operator of arity $n$ then $f(p_1,p_2,\dotsc,p_n)$ is a formula.
+
+\section{QBF}
+The definition of a formula in \gls{qbf} is similar to that of propositional logic however a set $\phi$ is introduced containing the quantifiers. In this case we will consider $\phi=\left \{\exists, \forall\right \}$. 
+
+As in propositional logic, formulas are defined by saying that any element of $A$ is a formula and if $p_1,p_2,\dotsc,p_n$ are formulas and $f \in \Omega$ is a logical operator of arity $n$ then $f(p_1,p_2,\dotsc,p_n)$ is a formula but also if $p$ is a formula, $Q \in \phi$ is a quantifier and $x \in A$ is a variable then $Qx p$ is a formula.
+
+\section{First Order Logic}
+First order logic introduces predicates which makes the definition more complicated than that of propositional logic. There is a set $\mathcal{V}$ of variables, a set $\mathcal{C}$ of constants, $\mathcal{F}$ of functions, $\mathcal{R}$ a set of relation symbols and the logical symbols $\neg, \to, \forall$. 
+
+A term is defined as an element of $\mathcal{V} \cup \mathcal{C}$ and if $t_1,t_2,\dotsc,t_n$ are terms and $f\in\mathcal{F}$ is a function of arity $n$ then $f(t_1,t_2,\dotsc,t_n)$ is a term.
+
+To define formulas we first define a relation, if $t_1,t_2,\dotsc,t_n$ are terms and $R\in\mathcal{R}$ is a relation of arity $n$ then $R(t_1,t_2,\dotsc,t_n)$ is a formula. More complex formulas are then built up using the logical symbols. If $\varphi$ and $\psi$ are formulas and $x$ is a variable then $(\neg\varphi)$, $(\varphi\to\psi)$ and $(\forall x\phi)$ are formulas.
+
+The more familiar connectives of $\lor$ and $\land$ and the quantifier $\exists$ can be made out of these logical symbols. The formula $\varphi\lor\psi$ is logically equivalent to $(\neg\varphi)\to\psi$, the formula $\varphi\land\psi$ is logically equivalent to $\neg(\varphi\to(\neg\psi))$ and the formula $\exists x \varphi$ is logically equivalent to $\neg\forall x(\neg\varphi)$.
