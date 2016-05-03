@@ -46,7 +46,7 @@ We shall apply Skolemization to our example \gls{qbf}~\ref{qbf:2} after it has b
 \end{equation}
 
 \section{Removing Function Symbols Introduced by Skolemization}
-The final step in converting our \gls{qbf} to \gls{epr} is to remove the function symbols that were introduced by Skolemization. This is done by `lifting' the functions to predicate. Lifting the functions to predicates means creating a new predicate whose arguments are the variables in the function being lifted. For example $p(f_z(x, y))$ would become the predicate $p_z(x, y)$. Once again this process produces a new formula that is equisatisfiable to the previous formula.
+The final step in converting our \gls{qbf} to \gls{epr} is to remove the function symbols that were introduced by Skolemization. This is done by `lifting' the functions to predicates. Lifting the functions to predicates means creating a new predicate whose arguments are the variables in the function being lifted. For example $p(f_z(x, y))$ would become the predicate $p_z(x, y)$. Once again this process produces a new formula that is equisatisfiable to the previous formula.
 
 Once all the functions have been lifted to predicates we have our \gls{epr} result. The definition of \gls{epr} required the prefix to be in the form $\exists * \forall *$ which was achieved by Skolemization to remove all the existentially quantified variables and it also required there to be no function symbols which was achieved by lifting the functions to predicates. This result can then be used as the input to an \gls{epr} solver to determine its satisfiability. Because each step in the process preserved satisfiability proving (or disproving) the satisfiability of the \gls{epr} output gives the satisfiability of the original \gls{qbf} input.
 
@@ -68,7 +68,7 @@ In section~\ref{skolemization} existentially quantified variables were replaced 
 Dependency schemes are important because they can affect the time to solve a given formula. If the number of variables a variable depends on is reduced the solver does not have to consider all of those extra dependencies and so can solve the formula more quickly.
 
 \subsection{Trivial Dependency Scheme}
-The simplest method of assigning dependencies to a variable is to say that it depends on everything that was quantified before it with a different quantifier. For the existentially quantified variables being considered for Skolemization this means that they depend on any variable universally quantified before them. For example in the prefix $\exists w \forall x \forall y \exists z$ the variable $z$ depends on $x$ and $y$ because they were universally quantified before it but not $w$ because it was universally quantified before it. This is called the trivial dependency scheme and is clearly tractable by linearly searching the prefix for universally quantified variables.
+The simplest method of assigning dependencies to a variable is to say that it depends on everything that was quantified before it with a different quantifier. For the existentially quantified variables being considered for Skolemization this means that they depend on any variable universally quantified before them. For example in the prefix $\exists w \forall x \forall y \exists z$ the variable $z$ depends on $x$ and $y$ because they were universally quantified before it but not $w$ because it was existentially quantified before $z$, not universally. This is called the trivial dependency scheme and is clearly tractable by linearly searching the prefix for universally quantified variables.
 
 \subsection{Standard Dependency Scheme} \label{stddepscheme}
 The standard dependency scheme is harder to define so this description will not cover it in great depth. A full description can be found in the aforementioned paper from Samer and Szeider~\cite{samer2009backdoor}.
@@ -77,7 +77,7 @@ We will look at the idea of dependency from the opposite perspective; given a va
 
 Figure~\ref{bigrapheasy} is the incidence graph of formula~\ref{qbf:1}. Trivially we can see that $z$ depends on both $x$ and $y$ because it appears in clauses with both of them but compared to the trivial dependency scheme it doesn't depend on $w$ because there is no path from $w$ to $z$ in the graph traveling only through clauses containing variables in the set $R(w)=\left \{z\right \}$, the only way to do so is to go via $x$ which is not in $R(w)$. Despite being quantified to the right of $w$, $x$ was quantified universally so it is not included.
 
-\begin{figure}
+\begin{figure}[H]
 \begin{CenteredBox}
 \input{bigrapheasy.tex}
 \end{CenteredBox}
@@ -102,7 +102,7 @@ To see less obvious dependencies with the standard dependency scheme we need a s
 
 The incidence graph for formula~\ref{hardformula} is figure~\ref{bigraphhard}.
 
-\begin{figure}
+\begin{figure}[H]
 \begin{CenteredBox}
 \input{bigraphhard.tex}
 \end{CenteredBox}
